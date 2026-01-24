@@ -1,0 +1,18 @@
+{
+  "name": "senlin-yogurt",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Senlin Yogurt - 奶茶点单系统",
+  "workspaces": [
+    "frontend",
+    "backend",
+    "admin"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev:weapp --workspace=frontend",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:admin": "npm run dev --workspace=admin",
+    "start:backend": "npm run start --workspace=backend",
+    "db:init": "npm run db:init --workspace=backend"
+  }
+}

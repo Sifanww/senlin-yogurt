@@ -1,0 +1,323 @@
+// 结算页面样式
+.checkout-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+// 顶部导航
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 32px;
+  background-color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-back {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .back-icon {
+    font-size: 48px;
+    color: #333;
+    font-weight: 300;
+  }
+}
+
+.nav-title {
+  font-size: 34px;
+  color: #333;
+  font-weight: bold;
+}
+
+.nav-placeholder {
+  width: 60px;
+}
+
+// 内容区
+.checkout-content {
+  flex: 1;
+  padding: 24px;
+  width: auto;
+}
+
+// 区块样式
+.section {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+
+  .title-icon {
+    font-size: 32px;
+    margin-right: 12px;
+  }
+
+  .title-text {
+    font-size: 30px;
+    color: #333;
+    font-weight: bold;
+  }
+
+  .title-count {
+    font-size: 26px;
+    color: #999;
+    margin-left: 12px;
+  }
+}
+
+// 取餐方式卡片
+.order-type-card {
+  background-color: #fff;
+  border-radius: 20px;
+  padding: 28px;
+}
+
+.type-options {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.type-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  background-color: #f8f8f8;
+  border-radius: 16px;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+
+  &.active {
+    background-color: #f0f9ed;
+    border-color: #7bc96f;
+  }
+
+  .option-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+  }
+
+  .option-text {
+    font-size: 28px;
+    color: #333;
+  }
+}
+
+.type-detail {
+  display: flex;
+  align-items: center;
+  padding-top: 24px;
+  border-top: 1px solid #f5f5f5;
+
+  .detail-label {
+    font-size: 28px;
+    color: #666;
+    margin-right: 24px;
+  }
+
+  .detail-value {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .store-name,
+  .address-text {
+    font-size: 28px;
+    color: #333;
+  }
+
+  .store-arrow {
+    font-size: 32px;
+    color: #999;
+    margin-left: 8px;
+  }
+}
+
+// 商品卡片
+.goods-card {
+  background-color: #fff;
+  border-radius: 20px;
+  padding: 8px 28px;
+}
+
+.goods-item {
+  display: flex;
+  padding: 24px 0;
+  border-bottom: 1px solid #f5f5f5;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.goods-image {
+  width: 140px;
+  height: 140px;
+  border-radius: 12px;
+  margin-right: 20px;
+  flex-shrink: 0;
+}
+
+.goods-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  .goods-name {
+    font-size: 30px;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .goods-spec {
+    font-size: 24px;
+    color: #999;
+    margin-bottom: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .goods-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+  }
+
+  .goods-price {
+    font-size: 32px;
+    color: #ff6b6b;
+    font-weight: bold;
+
+    .price-symbol {
+      font-size: 22px;
+    }
+  }
+
+  .goods-qty {
+    font-size: 28px;
+    color: #999;
+  }
+}
+
+// 备注卡片
+.remark-card {
+  background-color: #fff;
+  border-radius: 20px;
+  padding: 24px 28px;
+}
+
+.remark-input {
+  width: 100%;
+  height: 120px;
+  font-size: 28px;
+  color: #333;
+  border: none;
+  resize: none;
+  background: transparent;
+
+  &::placeholder {
+    color: #ccc;
+  }
+}
+
+// 价格卡片
+.price-card {
+  background-color: #fff;
+  border-radius: 20px;
+  padding: 20px 28px;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+
+  .price-label {
+    font-size: 28px;
+    color: #666;
+  }
+
+  .price-value {
+    font-size: 28px;
+    color: #333;
+
+    &.discount {
+      color: #ff6b6b;
+    }
+  }
+}
+
+// 底部占位
+.bottom-placeholder {
+  height: 180px;
+}
+
+// 底部结算栏
+.checkout-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  background-color: #fff;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.total-info {
+  display: flex;
+  align-items: baseline;
+
+  .total-label {
+    font-size: 28px;
+    color: #666;
+    margin-right: 12px;
+  }
+
+  .total-price {
+    font-size: 48px;
+    color: #ff6b6b;
+    font-weight: bold;
+
+    .price-symbol {
+      font-size: 28px;
+    }
+  }
+}
+
+.pay-btn {
+  padding: 28px 80px;
+  font-size: 34px;
+  color: #fff;
+  font-weight: bold;
+  background: linear-gradient(135deg, #a8d8a0 0%, #7bc96f 100%);
+  border-radius: 48px;
+
+  &:active {
+    opacity: 0.85;
+  }
+}

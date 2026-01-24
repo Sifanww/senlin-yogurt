@@ -1,0 +1,14 @@
+// 全局样式
+page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.taro-tabbar__panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+}
