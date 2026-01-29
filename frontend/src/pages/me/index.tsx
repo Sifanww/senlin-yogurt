@@ -68,7 +68,7 @@ export default function Me() {
         Taro.showToast({ title: '积分兑换', icon: 'none' })
         break
       case 'address':
-        Taro.showToast({ title: '外卖地址', icon: 'none' })
+        Taro.navigateTo({ url: '/pages/address/index' })
         break
       default:
         break
