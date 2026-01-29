@@ -43,3 +43,14 @@ export const userApi = {
   updateProfile: (data: { nickname?: string; avatar?: string }) => 
     request({ url: '/api/user/profile', method: 'PUT', data })
 }
+
+// 地址相关
+export const addressApi = {
+  getList: (userId: number) => request({ url: '/api/addresses', data: { user_id: userId } }),
+  getById: (id: number) => request({ url: `/api/addresses/${id}` }),
+  create: (data: { user_id: number; name: string; phone: string; address: string; is_default?: number }) => 
+    request({ url: '/api/addresses', method: 'POST', data }),
+  update: (id: number, data: { name?: string; phone?: string; address?: string; is_default?: number; user_id?: number }) => 
+    request({ url: `/api/addresses/${id}`, method: 'PUT', data }),
+  delete: (id: number) => request({ url: `/api/addresses/${id}`, method: 'DELETE' })
+}

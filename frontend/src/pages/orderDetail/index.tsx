@@ -115,7 +115,7 @@ export default function OrderDetail() {
           <View className='info-card'>
             <View className='info-row'>
               <Text className='info-label'>取餐门店</Text>
-              <Text className='info-value'>森林酸奶·曲靖嘉城店</Text>
+              <Text className='info-value'>森林酸奶·玉溪店</Text>
             </View>
             <View className='info-row'>
               <Text className='info-label'>订单号</Text>
