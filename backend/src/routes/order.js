@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const { auth } = require('../middleware/auth');
 
 // 生成订单号
 function generateOrderNo() {
@@ -15,11 +16,13 @@ function generateOrderNo() {
   return timestamp + random;
 }
 
-// 获取订单列表
-router.get('/', (req, res) => {
+// 获取订单列表（需要登录，只返回当前用户的订单）
+router.get('/', auth, (req, res) => {
   const { status } = req.query;
-  let sql = 'SELECT * FROM orders WHERE 1=1';
-  const params = [];
+  const userId = req.user.id;
+  
+  let sql = 'SELECT * FROM orders WHERE user_id = ?';
+  const params = [userId];
   
   if (status !== undefined) { sql += ' AND status = ?'; params.push(status); }
   sql += ' ORDER BY id DESC';
@@ -28,9 +31,10 @@ router.get('/', (req, res) => {
   res.json({ data: orders });
 });
 
-// 获取订单详情
-router.get('/:id', (req, res) => {
-  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
+// 获取订单详情（需要登录，只能查看自己的订单）
+router.get('/:id', auth, (req, res) => {
+  const userId = req.user.id;
+  const order = db.prepare('SELECT * FROM orders WHERE id = ? AND user_id = ?').get(req.params.id, userId);
   if (!order) {
     return res.status(404).json({ error: '订单不存在' });
   }
@@ -38,9 +42,11 @@ router.get('/:id', (req, res) => {
   res.json({ data: { ...order, items } });
 });
 
-// 创建订单
-router.post('/', (req, res) => {
+// 创建订单（需要登录）
+router.post('/', auth, (req, res) => {
   const { items, remark } = req.body;
+  const userId = req.user.id;
+  
   if (!items || !items.length) {
     return res.status(400).json({ error: '订单商品不能为空' });
   }
@@ -60,8 +66,8 @@ router.post('/', (req, res) => {
   // 事务处理
   const insertOrder = db.transaction(() => {
     const orderResult = db.prepare(
-      'INSERT INTO orders (order_no, total_amount, remark) VALUES (?, ?, ?)'
-    ).run(orderNo, totalAmount, remark);
+      'INSERT INTO orders (order_no, user_id, total_amount, remark) VALUES (?, ?, ?, ?)'
+    ).run(orderNo, userId, totalAmount, remark);
     
     const orderId = orderResult.lastInsertRowid;
     

@@ -1,8 +1,11 @@
 import { View, Text, Input, Button } from '@tarojs/components'
 import { useState } from 'react'
 import Taro from '@tarojs/taro'
-import { userApi } from '../../services/api'
+import { userApi } from '../../services'
 import './index.scss'
+
+// 是否使用云开发模式（微信一键登录）
+const USE_CLOUD = true
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true)
@@ -10,6 +13,25 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
 
+  // 微信一键登录
+  const handleWxLogin = async () => {
+    setLoading(true)
+    try {
+      await (userApi as any).wxLogin()
+      
+      Taro.showToast({ title: '登录成功', icon: 'success' })
+      
+      setTimeout(() => {
+        Taro.navigateBack()
+      }, 1500)
+    } catch (error: any) {
+      Taro.showToast({ title: error.message || '登录失败', icon: 'none' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 手机号密码登录
   const handleSubmit = async () => {
     if (!phone || !password) {
       Taro.showToast({ title: '请填写完整信息', icon: 'none' })
@@ -48,6 +70,39 @@ export default function Login() {
     }
   }
 
+  // 云开发模式：显示微信一键登录
+  if (USE_CLOUD) {
+    return (
+      <View className='login'>
+        <View className='logo'>
+          <Text className='logo-icon'>🧋</Text>
+          <Text className='logo-text'>森林酸奶</Text>
+        </View>
+
+        <View className='form'>
+          <Button 
+            className={`submit-btn wx-btn ${loading ? 'disabled' : ''}`}
+            onClick={handleWxLogin}
+            disabled={loading}
+          >
+            {loading ? '登录中...' : '微信一键登录'}
+          </Button>
+          
+          <View className='wx-tip'>
+            <Text className='tip-text'>使用微信账号快速登录</Text>
+          </View>
+        </View>
+
+        <View className='agreement'>
+          <Text className='agreement-text'>
+            登录即表示同意 <Text className='link'>用户协议</Text> 和 <Text className='link'>隐私政策</Text>
+          </Text>
+        </View>
+      </View>
+    )
+  }
+
+  // 本地开发模式：手机号密码登录
   return (
     <View className='login'>
       <View className='logo'>

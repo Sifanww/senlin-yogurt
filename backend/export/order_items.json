@@ -1,0 +1,3 @@
+{"_id":"order_item_1","id":1,"order_id":1,"product_id":4,"product_name":"芒果酸奶碗","price":28,"quantity":1}
+{"_id":"order_item_2","id":2,"order_id":2,"product_id":3,"product_name":"玫瑰酸奶碗","price":28,"quantity":1}
+{"_id":"order_item_3","id":3,"order_id":3,"product_id":3,"product_name":"玫瑰酸奶碗","price":28,"quantity":1}

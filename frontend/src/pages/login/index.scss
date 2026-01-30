@@ -66,6 +66,20 @@
       &.disabled {
         opacity: 0.6;
       }
+
+      &.wx-btn {
+        background: linear-gradient(90deg, #07c160 0%, #10d070 100%);
+      }
+    }
+
+    .wx-tip {
+      text-align: center;
+      margin-top: 24px;
+
+      .tip-text {
+        font-size: 26px;
+        color: #999;
+      }
     }
 
     .switch-mode {

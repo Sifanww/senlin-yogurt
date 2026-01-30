@@ -1,6 +1,37 @@
 import Taro from '@tarojs/taro'
 
-const BASE_URL = process.env.TARO_ENV === 'h5' ? '' : 'http://localhost:3000'
+function getEnvVar(key: string): string | undefined {
+  try {
+    if (typeof process !== 'undefined' && (process as any).env) {
+      return (process as any).env[key]
+    }
+  } catch {
+    // ignore
+  }
+  return undefined
+}
+
+// 请求/资源基础地址
+// - H5 走同域（''）
+// - 小程序开发者工具默认可用 localhost
+// - 真机调试请在 storage 中写入 BASE_URL（如 http://你的局域网IP:3000）
+const isH5 = Taro.getEnv?.() === Taro.ENV_TYPE.WEB
+const DEFAULT_BASE_URL = isH5 ? '' : 'http://localhost:3000'
+const BASE_URL =
+  (Taro.getStorageSync('BASE_URL') as string) ||
+  getEnvVar('TARO_APP_API_BASE_URL') ||
+  DEFAULT_BASE_URL
+
+// 获取完整的图片URL
+export function getImageUrl(path: string): string {
+  if (!path) return ''
+  // 如果已经是完整URL，直接返回
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path
+  }
+  // 否则拼接BASE_URL
+  return `${BASE_URL}${path}`
+}
 
 interface RequestOptions {
   url: string

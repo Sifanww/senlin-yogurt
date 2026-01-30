@@ -1,7 +1,8 @@
 import { View, Text, Image, ScrollView, Textarea } from '@tarojs/components'
 import { useState, useEffect } from 'react'
 import Taro, { useRouter, useDidShow } from '@tarojs/taro'
-import { orderApi, addressApi } from '../../services/api'
+import { orderApi, addressApi } from '../../services'
+import { getImageUrl } from '../../services'
 import './index.scss'
 
 interface CartItem {
@@ -37,6 +38,25 @@ export default function Checkout() {
   const [userId, setUserId] = useState<number | null>(null)
 
   useEffect(() => {
+    // 检查登录状态
+    const token = Taro.getStorageSync('token')
+    if (!token) {
+      Taro.showModal({
+        title: '提示',
+        content: '请先登录后再下单',
+        confirmText: '去登录',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            Taro.navigateTo({ url: '/pages/login/index' })
+          } else {
+            Taro.navigateBack()
+          }
+        }
+      })
+      return
+    }
+
     const type = router.params.orderType as 'pickup' | 'delivery'
     if (type) setOrderType(type)
 
@@ -59,7 +79,7 @@ export default function Checkout() {
 
   const loadAddresses = async (uid: number) => {
     try {
-      const res = await addressApi.getList(uid)
+      const res = await addressApi.getList()
       const list = res.data || []
       setAddresses(list)
       // 自动选择默认地址
@@ -79,6 +99,22 @@ export default function Checkout() {
   const getTotalCount = () => cartItems.reduce((sum, item) => sum + item.quantity, 0)
 
   const submitOrder = async () => {
+    // 再次检查登录状态
+    const token = Taro.getStorageSync('token')
+    if (!token) {
+      Taro.showModal({
+        title: '提示',
+        content: '请先登录后再下单',
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            Taro.navigateTo({ url: '/pages/login/index' })
+          }
+        }
+      })
+      return
+    }
+
     if (cartItems.length === 0) {
       Taro.showToast({ title: '购物车为空', icon: 'none' })
       return
@@ -110,9 +146,18 @@ export default function Checkout() {
       setTimeout(() => {
         Taro.redirectTo({ url: `/pages/orderDetail/index?orderId=${res.data.id}` })
       }, 1500)
-    } catch (error) {
+    } catch (error: any) {
       Taro.hideLoading()
-      Taro.showToast({ title: '下单失败，请重试', icon: 'none' })
+      if (error.message?.includes('请先登录') || error.message?.includes('401')) {
+        Taro.removeStorageSync('token')
+        Taro.removeStorageSync('userInfo')
+        Taro.showToast({ title: '登录已过期，请重新登录', icon: 'none' })
+        setTimeout(() => {
+          Taro.navigateTo({ url: '/pages/login/index' })
+        }, 1500)
+      } else {
+        Taro.showToast({ title: '下单失败，请重试', icon: 'none' })
+      }
     }
   }
 
@@ -212,7 +257,7 @@ export default function Checkout() {
           <View className='goods-card'>
             {cartItems.map(item => (
               <View key={item.cartId} className='goods-item'>
-                <Image className='goods-image' src={item.product.image} mode='aspectFill' />
+                <Image className='goods-image' src={getImageUrl(item.product.image)} mode='aspectFill' />
                 <View className='goods-info'>
                   <Text className='goods-name'>{item.product.name}</Text>
                   <Text className='goods-spec'>{getProductDesc(item)}</Text>

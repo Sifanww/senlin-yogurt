@@ -1,7 +1,7 @@
 import { View, Text, ScrollView } from '@tarojs/components'
 import { useState } from 'react'
 import Taro, { useDidShow } from '@tarojs/taro'
-import { orderApi } from '../../services/api'
+import { orderApi } from '../../services'
 import './index.scss'
 
 interface OrderItem {
@@ -18,8 +18,37 @@ interface Order {
   total_amount: number
   status: number
   remark: string
-  created_at: string
+  created_at: any
   items?: OrderItem[]
+}
+
+function formatDateTime(value: any): string {
+  if (value == null) return ''
+  if (typeof value === 'string') return value
+  if (typeof value === 'number') {
+    const ms = value > 1e12 ? value : value * 1000
+    return formatDateTime(new Date(ms))
+  }
+  if (value instanceof Date) {
+    const pad = (n: number) => String(n).padStart(2, '0')
+    const y = value.getFullYear()
+    const m = pad(value.getMonth() + 1)
+    const d = pad(value.getDate())
+    const hh = pad(value.getHours())
+    const mm = pad(value.getMinutes())
+    return `${y}-${m}-${d} ${hh}:${mm}`
+  }
+
+  // 兼容云开发时间戳对象（不同平台字段可能不同）
+  const seconds = value?.seconds ?? value?._seconds
+  const nanoseconds = value?.nanoseconds ?? value?._nanoseconds
+  if (typeof seconds === 'number') {
+    const ms = seconds * 1000 + (typeof nanoseconds === 'number' ? Math.floor(nanoseconds / 1e6) : 0)
+    return formatDateTime(new Date(ms))
+  }
+
+  // 最后兜底：避免直接渲染对象导致 React 报错
+  return String(value)
 }
 
 const statusMap: Record<number, string> = {
@@ -37,8 +66,30 @@ export default function Orders() {
   const [loading, setLoading] = useState(true)
 
   useDidShow(() => {
-    loadOrders()
+    checkLoginAndLoad()
   })
+
+  const checkLoginAndLoad = () => {
+    const token = Taro.getStorageSync('token')
+    if (!token) {
+      Taro.showModal({
+        title: '提示',
+        content: '请先登录后查看订单',
+        confirmText: '去登录',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            Taro.navigateTo({ url: '/pages/login/index' })
+          } else {
+            Taro.navigateBack()
+          }
+        }
+      })
+      setLoading(false)
+      return
+    }
+    loadOrders()
+  }
 
   const loadOrders = async () => {
     try {
@@ -46,8 +97,16 @@ export default function Orders() {
       const params = activeTab === 'all' ? {} : { status: activeTab }
       const res = await orderApi.getList(params)
       setOrders(res.data || [])
-    } catch (error) {
+    } catch (error: any) {
       console.error('获取订单列表失败:', error)
+      if (error.message?.includes('请先登录') || error.message?.includes('401')) {
+        Taro.removeStorageSync('token')
+        Taro.removeStorageSync('userInfo')
+        Taro.showToast({ title: '登录已过期，请重新登录', icon: 'none' })
+        setTimeout(() => {
+          Taro.navigateTo({ url: '/pages/login/index' })
+        }, 1500)
+      }
     } finally {
       setLoading(false)
     }
@@ -121,7 +180,7 @@ export default function Orders() {
               </View>
 
               <View className='order-footer'>
-                <Text className='order-time'>{order.created_at}</Text>
+                <Text className='order-time'>{formatDateTime(order.created_at)}</Text>
                 <View className='order-total'>
                   <Text className='total-label'>实付</Text>
                   <Text className='total-price'>¥{order.total_amount}</Text>
