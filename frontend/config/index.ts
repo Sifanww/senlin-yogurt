@@ -31,6 +31,7 @@ export default defineConfig<'vite'>(async (merge, { command, mode }) => {
     framework: 'react',
     compiler: 'vite',
     mini: {
+      debugReact: true,
       postcss: {
         pxtransform: {
           enable: true,

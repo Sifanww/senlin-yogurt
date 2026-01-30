@@ -34,6 +34,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: '服务器内部错误', message: err.message });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+// 监听所有网络接口，允许局域网访问
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running at http://0.0.0.0:${PORT}`);
+  console.log(`📱 局域网访问: http://10.5.248.199:${PORT}`);
 });

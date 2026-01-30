@@ -1,7 +1,7 @@
 import { View, Text, ScrollView } from '@tarojs/components'
 import { useState, useEffect } from 'react'
 import Taro, { useRouter } from '@tarojs/taro'
-import { orderApi } from '../../services/api'
+import { orderApi } from '../../services'
 import './index.scss'
 
 interface OrderItem {
@@ -18,9 +18,35 @@ interface Order {
   total_amount: number
   status: number
   remark: string
-  created_at: string
+  created_at: any
   updated_at: string
   items: OrderItem[]
+}
+
+function formatDateTime(value: any): string {
+  if (value == null) return ''
+  if (typeof value === 'string') return value
+  if (typeof value === 'number') {
+    const ms = value > 1e12 ? value : value * 1000
+    return formatDateTime(new Date(ms))
+  }
+  if (value instanceof Date) {
+    const pad = (n: number) => String(n).padStart(2, '0')
+    const y = value.getFullYear()
+    const m = pad(value.getMonth() + 1)
+    const d = pad(value.getDate())
+    const hh = pad(value.getHours())
+    const mm = pad(value.getMinutes())
+    return `${y}-${m}-${d} ${hh}:${mm}`
+  }
+
+  const seconds = value?.seconds ?? value?._seconds
+  const nanoseconds = value?.nanoseconds ?? value?._nanoseconds
+  if (typeof seconds === 'number') {
+    const ms = seconds * 1000 + (typeof nanoseconds === 'number' ? Math.floor(nanoseconds / 1e6) : 0)
+    return formatDateTime(new Date(ms))
+  }
+  return String(value)
 }
 
 const statusMap: Record<number, string> = {
@@ -48,7 +74,7 @@ export default function OrderDetail() {
     try {
       setLoading(true)
       const res = await orderApi.getById(Number(orderId))
-      setOrder(res.data)
+      setOrder(res.data as Order)
     } catch (error) {
       console.error('获取订单失败:', error)
     } finally {
@@ -130,7 +156,7 @@ export default function OrderDetail() {
             <Text className='title-text'>商品信息</Text>
           </View>
           <View className='goods-card'>
-            {order.items.map(item => (
+            {(order.items || []).map(item => (
               <View key={item.id} className='goods-item'>
                 <View className='goods-info'>
                   <Text className='goods-name'>{item.product_name}</Text>
@@ -152,7 +178,7 @@ export default function OrderDetail() {
           <View className='info-card'>
             <View className='info-row'>
               <Text className='info-label'>下单时间</Text>
-              <Text className='info-value'>{order.created_at}</Text>
+              <Text className='info-value'>{formatDateTime(order.created_at)}</Text>
             </View>
             {order.remark && (
               <View className='info-row'>

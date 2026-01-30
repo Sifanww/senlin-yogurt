@@ -58,9 +58,9 @@ export default function Index() {
             <View className='banner-item' style={{ backgroundColor: item.bgColor }}>
               <View className='banner-content'>
                 <View className='slogan'>
-                  {item.slogan.map((text, idx) => (
-                    <Text key={idx} className='slogan-text'>{text}</Text>
-                  ))}
+                  {item.slogan.map((text, idx) => {
+                    return <Text key={idx} className='slogan-text'>{text}</Text>
+                  })}
                 </View>
                 <View className='title-wrapper'>
                   <Text className='title'>{item.title}</Text>

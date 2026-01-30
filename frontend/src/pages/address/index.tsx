@@ -1,7 +1,7 @@
 import { View, Text, Input, Textarea, Button, ScrollView } from '@tarojs/components'
 import { useState, useEffect } from 'react'
 import Taro from '@tarojs/taro'
-import { addressApi } from '../../services/api'
+import { addressApi } from '../../services'
 import './index.scss'
 
 interface Address {
