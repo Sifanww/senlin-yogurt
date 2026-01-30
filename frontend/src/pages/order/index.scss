@@ -42,11 +42,13 @@
   flex: 1;
   display: flex;
   overflow: hidden;
+  width: 100%;
 }
 
 // 左侧分类导航
 .category-nav {
-  width: 180px;
+  flex: 2;
+  min-width: 0;
   height: 100%;
   background-color: #f5f5f5;
 }
@@ -97,10 +99,12 @@
 
 // 右侧商品列表
 .product-list {
-  flex: 1;
+  flex: 8;
+  min-width: 0;
   height: 100%;
   background-color: #fff;
   padding: 0 24px;
+  box-sizing: border-box;
 }
 
 .section-header {
@@ -130,10 +134,10 @@
 }
 
 .product-image {
-  width: 180px;
-  height: 180px;
+  width: 160px;
+  height: 160px;
   border-radius: 16px;
-  margin-right: 24px;
+  margin-right: 20px;
   flex-shrink: 0;
   background-color: #f9f9f9;
 }
@@ -143,12 +147,13 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  overflow: hidden;
 
   .product-name {
-    font-size: 32px;
+    font-size: 30px;
     color: #333;
     font-weight: 600;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -224,7 +229,7 @@
   top: 0;
   left: 0;
   right: 0;
-  bottom: 50px; // tabBar 高度上方
+  bottom: 0;
   z-index: 900;
 }
 
@@ -241,10 +246,10 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 24px;
+  bottom: calc(100rpx + env(safe-area-inset-bottom)); // 紧贴 tabBar 上方
   background-color: #fff;
   border-radius: 32px 32px 0 0;
-  max-height: 85%;
+  max-height: 70%;
   display: flex;
   flex-direction: column;
   animation: slideUp 0.3s ease;
@@ -254,6 +259,7 @@
   from {
     transform: translateY(100%);
   }
+
   to {
     transform: translateY(0);
   }
@@ -463,9 +469,10 @@
   }
 }
 
-// 底部占位（让最后一个分类能滚动到顶部）
+// 底部占位（让最后一个分类能滚动到顶部，同时预留购物车栏空间）
 .bottom-placeholder {
-  height: calc(100vh - 300px);
+  height: calc(100vh - 400px);
+  min-height: 200px;
 }
 
 // 底部购物车栏
@@ -473,7 +480,7 @@
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 50px; // tabBar 高度上方
+  bottom: 0; // 原生 tabBar 高度约 50px
   display: flex;
   align-items: center;
   padding: 16px 24px;
@@ -559,7 +566,7 @@
   top: 0;
   left: 0;
   right: 0;
-  bottom: 50px; // tabBar 高度上方
+  bottom: 0;
   z-index: 800;
 }
 
@@ -576,13 +583,12 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: 0; // tabBar + 购物车栏高度
   background-color: #fff;
   border-radius: 32px 32px 0 0;
   max-height: 50%;
   display: flex;
   flex-direction: column;
-  padding-bottom: 120px; // 购物车栏高度
   animation: slideUp 0.3s ease;
 }
 

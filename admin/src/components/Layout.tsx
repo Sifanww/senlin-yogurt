@@ -20,7 +20,7 @@ export default function Layout() {
     <AntLayout style={{ minHeight: '100vh' }}>
       <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed}>
         <div style={{ height: 32, margin: 16, background: 'rgba(255,255,255,0.2)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 'bold' }}>
-          {collapsed ? '森林' : '森林酸奶'}
+          {collapsed ? '森邻' : '森邻酸奶'}
         </div>
         <Menu
           theme="dark"

@@ -7,12 +7,13 @@ export default defineAppConfig({
     'pages/checkout/index',
     'pages/orderDetail/index',
     'pages/login/index',
-    'pages/address/index'
+    'pages/address/index',
+    'pages/productDetail/index'
   ],
   window: {
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#fff',
-    navigationBarTitleText: '森林酸奶',
+    navigationBarTitleText: '森邻酸奶',
     navigationBarTextStyle: 'black'
   },
   tabBar: {

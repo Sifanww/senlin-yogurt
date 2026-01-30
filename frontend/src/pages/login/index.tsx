@@ -76,7 +76,7 @@ export default function Login() {
       <View className='login'>
         <View className='logo'>
           <Text className='logo-icon'>🧋</Text>
-          <Text className='logo-text'>森林酸奶</Text>
+          <Text className='logo-text'>森邻酸奶</Text>
         </View>
 
         <View className='form'>

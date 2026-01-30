@@ -165,7 +165,7 @@ export default function Orders() {
             <View key={order.id} className='order-card' onClick={() => viewOrderDetail(order.id)}>
               <View className='order-header'>
                 <View className='store-info'>
-                  <Text className='store-name'>森林酸奶</Text>
+                  <Text className='store-name'>森邻酸奶</Text>
                 </View>
                 <Text className='order-status'>{statusMap[order.status] || '未知'}</Text>
               </View>

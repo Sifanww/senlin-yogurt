@@ -1,4 +1,4 @@
-# 森林酸奶 (senlinYogurt) 项目分析文档
+# 森邻酸奶 (senlinYogurt) 项目分析文档
 
 ## 项目概述
 
