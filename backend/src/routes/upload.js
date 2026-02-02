@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const path = require('path');
+const { adminAuth } = require('../middleware/auth');
 
 // 确保上传目录存在
 const uploadDir = path.join(__dirname, '../../uploads');
@@ -10,7 +11,7 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 // 简单的 multipart 解析
-router.post('/', (req, res) => {
+router.post('/', adminAuth, (req, res) => {
   const chunks = [];
   
   req.on('data', chunk => chunks.push(chunk));

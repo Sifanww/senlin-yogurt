@@ -296,3 +296,21 @@ export const addressApi = {
     return { message: '删除成功' }
   }
 }
+
+// ============ 系统设置相关 ============
+// 收款码存储在本地后端，需要通过 HTTP 请求获取
+export const settingsApi = {
+  getPayQrCode: async () => {
+    // 从本地后端获取收款码配置
+    try {
+      const res = await Taro.request({
+        url: `${process.env.TARO_APP_API_BASE_URL || 'http://localhost:3000'}/api/settings/pay-qrcode`,
+        method: 'GET'
+      })
+      return res.data
+    } catch (err) {
+      console.error('获取收款码失败:', err)
+      return { data: { url: '' } }
+    }
+  }
+}

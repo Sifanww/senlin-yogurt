@@ -293,4 +293,82 @@
   &:active {
     opacity: 0.85;
   }
+
+  &.btn-pay {
+    background: linear-gradient(135deg, #07c160 0%, #06ad56 100%);
+  }
+}
+
+// 收款码弹窗
+.pay-modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.pay-modal {
+  width: 600px;
+  background-color: #fff;
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.pay-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32px;
+  background: linear-gradient(135deg, #07c160 0%, #06ad56 100%);
+}
+
+.pay-modal-title {
+  font-size: 34px;
+  color: #fff;
+  font-weight: bold;
+}
+
+.pay-modal-close {
+  width: 48px;
+  height: 48px;
+  line-height: 44px;
+  text-align: center;
+  font-size: 40px;
+  color: #fff;
+  opacity: 0.8;
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.pay-modal-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 32px 48px;
+}
+
+.pay-qrcode {
+  width: 400px;
+  height: 400px;
+  margin-bottom: 32px;
+}
+
+.pay-amount {
+  font-size: 36px;
+  color: #ff6b6b;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.pay-tip {
+  font-size: 26px;
+  color: #999;
 }

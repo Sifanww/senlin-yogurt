@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const { adminAuth } = require('../middleware/auth');
 
 // 获取商品列表
 router.get('/', (req, res) => {
@@ -26,7 +27,7 @@ router.get('/:id', (req, res) => {
 });
 
 // 创建商品
-router.post('/', (req, res) => {
+router.post('/', adminAuth, (req, res) => {
   const { category_id, name, description, price, image, stock = 0, status = 1 } = req.body;
   if (!category_id || !name || price === undefined) {
     return res.status(400).json({ error: '缺少必填字段' });
@@ -38,7 +39,7 @@ router.post('/', (req, res) => {
 });
 
 // 更新商品
-router.put('/:id', (req, res) => {
+router.put('/:id', adminAuth, (req, res) => {
   const { category_id, name, description, price, image, stock, status } = req.body;
   const updates = [];
   const values = [];
@@ -63,7 +64,7 @@ router.put('/:id', (req, res) => {
 });
 
 // 删除商品
-router.delete('/:id', (req, res) => {
+router.delete('/:id', adminAuth, (req, res) => {
   // 检查是否有订单关联
   const orderItem = db.prepare('SELECT id FROM order_items WHERE product_id = ? LIMIT 1').get(req.params.id);
   if (orderItem) {

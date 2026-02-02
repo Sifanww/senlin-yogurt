@@ -1,8 +1,18 @@
-import { View, Text, ScrollView } from '@tarojs/components'
+import { View, Text, ScrollView, Image } from '@tarojs/components'
 import { useState, useEffect } from 'react'
 import Taro, { useRouter } from '@tarojs/taro'
-import { orderApi } from '../../services'
+import { orderApi, settingsApi } from '../../services'
 import './index.scss'
+
+// 订单状态枚举
+enum OrderStatus {
+  PENDING_PAYMENT = 0,  // 待支付
+  PAID = 1,             // 已支付
+  PREPARING = 2,        // 制作中
+  READY = 3,            // 待取餐
+  COMPLETED = 4,        // 已完成
+  CANCELLED = 5         // 已取消
+}
 
 interface OrderItem {
   id: number
@@ -16,7 +26,7 @@ interface Order {
   id: number
   order_no: string
   total_amount: number
-  status: number
+  status: OrderStatus
   remark: string
   created_at: any
   updated_at: string
@@ -49,23 +59,37 @@ function formatDateTime(value: any): string {
   return String(value)
 }
 
-const statusMap: Record<number, string> = {
-  0: '待支付',
-  1: '已支付',
-  2: '制作中',
-  3: '待取餐',
-  4: '已完成',
-  5: '已取消'
+const statusMap: Record<OrderStatus, string> = {
+  [OrderStatus.PENDING_PAYMENT]: '待支付',
+  [OrderStatus.PAID]: '已支付',
+  [OrderStatus.PREPARING]: '制作中',
+  [OrderStatus.READY]: '待取餐',
+  [OrderStatus.COMPLETED]: '已完成',
+  [OrderStatus.CANCELLED]: '已取消'
 }
 
 export default function OrderDetail() {
   const router = useRouter()
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showPayModal, setShowPayModal] = useState(false)
+  const [payQrCode, setPayQrCode] = useState<string>('')
 
   useEffect(() => {
     loadOrder()
+    loadPayQrCode()
   }, [router.params.orderId])
+
+  const loadPayQrCode = async () => {
+    try {
+      const res = await settingsApi.getPayQrCode()
+      if (res.data?.url) {
+        setPayQrCode(res.data.url)
+      }
+    } catch (err) {
+      console.error('获取收款码失败:', err)
+    }
+  }
 
   const loadOrder = async () => {
     const orderId = router.params.orderId
@@ -84,6 +108,22 @@ export default function OrderDetail() {
 
   const goBack = () => {
     Taro.switchTab({ url: '/pages/orders/index' })
+  }
+
+  // 点击立即付款，弹出收款码
+  const handlePayNow = () => {
+    setShowPayModal(true)
+  }
+
+  // 关闭收款码弹窗
+  const closePayModal = () => {
+    setShowPayModal(false)
+  }
+
+  // 再来一单
+  const handleReorder = () => {
+    // 跳转到点单页
+    Taro.switchTab({ url: '/pages/order/index' })
   }
 
   if (loading) {
@@ -207,8 +247,29 @@ export default function OrderDetail() {
 
       <View className='bottom-bar'>
         <View className='btn-secondary' onClick={goBack}>返回订单列表</View>
-        <View className='btn-primary'>再来一单</View>
+        {order.status === OrderStatus.PENDING_PAYMENT ? (
+          <View className='btn-primary btn-pay' onClick={handlePayNow}>立即付款</View>
+        ) : (
+          <View className='btn-primary' onClick={handleReorder}>再来一单</View>
+        )}
       </View>
+
+      {/* 收款码弹窗 */}
+      {showPayModal && (
+        <View className='pay-modal-mask' onClick={closePayModal}>
+          <View className='pay-modal' onClick={(e) => e.stopPropagation()}>
+            <View className='pay-modal-header'>
+              <Text className='pay-modal-title'>微信扫码支付</Text>
+              <View className='pay-modal-close' onClick={closePayModal}>×</View>
+            </View>
+            <View className='pay-modal-body'>
+              <Image className='pay-qrcode' src={payQrCode} mode='aspectFit' />
+              <Text className='pay-amount'>支付金额：¥{order.total_amount}</Text>
+              <Text className='pay-tip'>请使用微信扫描二维码完成支付</Text>
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   )
 }
