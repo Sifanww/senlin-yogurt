@@ -41,6 +41,7 @@ export default function Orders() {
 
   const columns = [
     { title: '订单号', dataIndex: 'order_no', width: 180 },
+    { title: '下单人', dataIndex: 'user_nickname', width: 100, render: (v: string) => v || '未知用户' },
     { title: '金额', dataIndex: 'total_amount', render: (v: number) => `¥${v.toFixed(2)}` },
     { title: '状态', dataIndex: 'status', render: (v: number) => <Tag color={ORDER_STATUS[v as keyof typeof ORDER_STATUS]?.color}>{ORDER_STATUS[v as keyof typeof ORDER_STATUS]?.text}</Tag> },
     { title: '备注', dataIndex: 'remark', ellipsis: true },
@@ -83,6 +84,7 @@ export default function Orders() {
           <>
             <Descriptions column={2} bordered size="small">
               <Descriptions.Item label="订单号">{currentOrder.order_no}</Descriptions.Item>
+              <Descriptions.Item label="下单人">{currentOrder.user_nickname || '未知用户'}</Descriptions.Item>
               <Descriptions.Item label="状态">
                 <Tag color={ORDER_STATUS[currentOrder.status as keyof typeof ORDER_STATUS]?.color}>
                   {ORDER_STATUS[currentOrder.status as keyof typeof ORDER_STATUS]?.text}

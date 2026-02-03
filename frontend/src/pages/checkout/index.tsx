@@ -77,7 +77,7 @@ export default function Checkout() {
     }
   })
 
-  const loadAddresses = async (uid: number) => {
+  const loadAddresses = async (_uid?: number) => {
     try {
       const res = await addressApi.getList()
       const list = res.data || []
@@ -129,17 +129,27 @@ export default function Checkout() {
     Taro.showLoading({ title: '提交订单中...' })
 
     try {
-      const orderData = {
+      const orderData: any = {
         items: cartItems.map(item => ({
           product_id: item.product.id,
           quantity: item.quantity
         })),
-        remark: remark || undefined
+        remark: remark || undefined,
+        order_type: orderType
+      }
+      
+      // 外卖订单添加地址信息
+      if (orderType === 'delivery' && selectedAddress) {
+        orderData.address_name = selectedAddress.name
+        orderData.address_phone = selectedAddress.phone
+        orderData.address_detail = selectedAddress.address
       }
 
       const res = await orderApi.create(orderData)
       Taro.hideLoading()
       Taro.removeStorageSync('checkoutCart')
+      // 设置标记，让order页面清空购物车
+      Taro.setStorageSync('orderSubmitted', true)
 
       Taro.showToast({ title: '下单成功', icon: 'success', duration: 1500 })
 
@@ -221,7 +231,7 @@ export default function Checkout() {
               <View className='type-detail'>
                 <Text className='detail-label'>取餐门店</Text>
                 <View className='detail-value'>
-                  <Text className='store-name'>森林酸奶·玉溪店</Text>
+                  <Text className='store-name'>森邻酸奶·玉溪店</Text>
                   <Text className='store-arrow'>›</Text>
                 </View>
               </View>
@@ -327,7 +337,7 @@ export default function Checkout() {
           </Text>
         </View>
         <View className='pay-btn' onClick={submitOrder}>
-          立即支付
+          提交订单
         </View>
       </View>
 

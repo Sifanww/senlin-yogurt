@@ -1,0 +1,176 @@
+// 商品详情页样式
+.product-detail-page {
+  min-height: 100vh;
+  background-color: #f8f8f8;
+  padding-bottom: 140px;
+  box-sizing: border-box;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-size: 28px;
+  color: #999;
+}
+
+// 商品图片
+.product-image-wrap {
+  width: 100%;
+  height: 560px;
+  background-color: #fff;
+}
+
+.product-image {
+  width: 100%;
+  height: 100%;
+}
+
+// 商品信息
+.product-info {
+  background-color: #fff;
+  padding: 32px;
+  margin-bottom: 20px;
+}
+
+.product-name {
+  display: block;
+  font-size: 40px;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.product-desc {
+  display: block;
+  font-size: 28px;
+  color: #999;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.product-price {
+  display: flex;
+  align-items: baseline;
+
+  .price-symbol {
+    font-size: 28px;
+    color: #ff6b6b;
+    font-weight: bold;
+  }
+
+  .price-value {
+    font-size: 48px;
+    color: #ff6b6b;
+    font-weight: bold;
+  }
+}
+
+// 数量选择
+.quantity-section {
+  background-color: #fff;
+  padding: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-title {
+  font-size: 32px;
+  color: #333;
+  font-weight: bold;
+}
+
+.quantity-selector {
+  display: flex;
+  align-items: center;
+}
+
+.qty-btn {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+  border-radius: 50%;
+
+  &.disabled {
+    opacity: 0.5;
+  }
+
+  &:active:not(.disabled) {
+    background-color: #e8e8e8;
+  }
+
+  .qty-icon {
+    font-size: 36px;
+    color: #333;
+  }
+}
+
+.qty-num {
+  font-size: 36px;
+  color: #333;
+  font-weight: bold;
+  min-width: 80px;
+  text-align: center;
+}
+
+// 底部操作栏
+.bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding: 20px 32px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  background-color: #fff;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.total-info {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+}
+
+.total-label {
+  font-size: 28px;
+  color: #666;
+  margin-right: 12px;
+}
+
+.total-price {
+  display: flex;
+  align-items: baseline;
+
+  .price-symbol {
+    font-size: 28px;
+    color: #ff6b6b;
+    font-weight: bold;
+  }
+
+  .price-value {
+    font-size: 48px;
+    color: #ff6b6b;
+    font-weight: bold;
+  }
+}
+
+.add-cart-btn {
+  padding: 24px 64px;
+  font-size: 32px;
+  color: #fff;
+  font-weight: bold;
+  background: linear-gradient(135deg, #a8d8a0 0%, #7bc96f 100%);
+  border-radius: 48px;
+
+  &:active {
+    opacity: 0.85;
+  }
+}

@@ -61,7 +61,12 @@ export default function Login() {
       Taro.showToast({ title: isLogin ? '登录成功' : '注册成功', icon: 'success' })
       
       setTimeout(() => {
-        Taro.navigateBack()
+        // 根据角色跳转到不同页面
+        if (res.user?.role === 'admin') {
+          Taro.reLaunch({ url: '/pages/admin/index/index' })
+        } else {
+          Taro.navigateBack()
+        }
       }, 1500)
     } catch (error: any) {
       Taro.showToast({ title: error.message || '操作失败', icon: 'none' })
@@ -76,7 +81,7 @@ export default function Login() {
       <View className='login'>
         <View className='logo'>
           <Text className='logo-icon'>🧋</Text>
-          <Text className='logo-text'>森林酸奶</Text>
+          <Text className='logo-text'>森邻酸奶</Text>
         </View>
 
         <View className='form'>

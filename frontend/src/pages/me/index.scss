@@ -185,6 +185,15 @@
           font-size: 24px;
           color: #666;
         }
+
+        &.admin {
+          .icon-wrapper {
+            background: #e6f7ff;
+          }
+          .menu-text {
+            color: #1890ff;
+          }
+        }
       }
     }
   }

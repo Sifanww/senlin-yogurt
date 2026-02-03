@@ -9,6 +9,7 @@ interface UserInfo {
   nickname: string
   avatar?: string
   points: number
+  role?: string
 }
 
 export default function Me() {
@@ -69,6 +70,9 @@ export default function Me() {
         break
       case 'address':
         Taro.navigateTo({ url: '/pages/address/index' })
+        break
+      case 'admin':
+        Taro.navigateTo({ url: '/pages/admin/index/index' })
         break
       default:
         break
@@ -148,6 +152,15 @@ export default function Me() {
             </View>
             <Text className='menu-text'>外卖地址</Text>
           </View>
+          {/* 管理员入口 */}
+          {isLoggedIn && user?.role === 'admin' && (
+            <View className='menu-item admin' onClick={() => handleMenuClick('admin')}>
+              <View className='icon-wrapper'>
+                <Text className='icon-placeholder'>⚙️</Text>
+              </View>
+              <Text className='menu-text'>管理后台</Text>
+            </View>
+          )}
         </View>
       </View>
 

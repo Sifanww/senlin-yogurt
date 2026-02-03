@@ -1,9 +1,38 @@
 import axios from 'axios'
 
+import { clearAuth, getToken } from '../utils/auth'
+
 const api = axios.create({
   baseURL: '/api',
   timeout: 10000
 })
+
+api.interceptors.request.use((config) => {
+  const token = getToken()
+  if (token) {
+    config.headers = config.headers ?? {}
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
+api.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    if (error?.response?.status === 401) {
+      clearAuth()
+      const current = window.location.pathname + window.location.search
+      if (!current.startsWith('/login')) {
+        window.location.href = `/login?redirect=${encodeURIComponent(current)}`
+      }
+    }
+    return Promise.reject(error)
+  }
+)
+
+export const authApi = {
+  login: (data: { phone: string; password: string }) => api.post('/user/login', data)
+}
 
 // 商品相关
 export const productApi = {
@@ -48,6 +77,14 @@ export const orderApi = {
   updateStatus: (id: number, status: number) =>
     api.put(`/orders/${id}/status`, { status }),
   delete: (id: number) => api.delete(`/orders/${id}`)
+}
+
+// 设置相关
+export const settingsApi = {
+  getAll: () => api.get('/settings'),
+  getPayQrCode: () => api.get('/settings/pay-qrcode'),
+  updatePayQrCode: (url: string) => api.put('/settings/pay-qrcode', { url }),
+  update: (data: Record<string, any>) => api.put('/settings', data)
 }
 
 export default api

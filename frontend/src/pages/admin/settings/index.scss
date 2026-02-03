@@ -1,0 +1,112 @@
+.admin-settings {
+  padding: 20px;
+  background: #f5f5f5;
+  min-height: 100vh;
+
+  .header {
+    margin-bottom: 20px;
+
+    .title {
+      font-size: 36px;
+      font-weight: bold;
+    }
+  }
+
+  .settings-section {
+    background: #fff;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    overflow: hidden;
+
+    .section-title {
+      font-size: 28px;
+      font-weight: bold;
+      padding: 20px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 20px;
+      border-bottom: 1px solid #f0f0f0;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .item-left {
+        .item-label {
+          font-size: 30px;
+          color: #333;
+          margin-bottom: 8px;
+        }
+
+        .item-desc {
+          font-size: 24px;
+          color: #999;
+        }
+      }
+
+      .item-right {
+        display: flex;
+        align-items: center;
+
+        .item-value {
+          font-size: 28px;
+          color: #666;
+          margin-right: 12px;
+        }
+
+        .arrow {
+          color: #ccc;
+          font-size: 24px;
+        }
+      }
+    }
+  }
+
+  .qrcode-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+
+    .section-title {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .qrcode-image {
+      width: 300px;
+      height: 300px;
+      margin: 0 auto 20px;
+      background: #f5f5f5;
+      border-radius: 8px;
+    }
+
+    .upload-btn {
+      display: inline-block;
+      background: #7bc96f;
+      color: #fff;
+      padding: 16px 40px;
+      border-radius: 8px;
+      font-size: 28px;
+    }
+
+    .tip {
+      font-size: 24px;
+      color: #999;
+      margin-top: 16px;
+    }
+  }
+
+  .version {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+    font-size: 24px;
+  }
+}

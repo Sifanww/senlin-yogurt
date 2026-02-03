@@ -44,4 +44,14 @@ function optionalAuth(req, res, next) {
   next();
 }
 
-module.exports = { auth, optionalAuth };
+// 管理员认证中间件 - 必须登录且角色为 admin
+function adminAuth(req, res, next) {
+  auth(req, res, () => {
+    if (req.user?.role !== 'admin') {
+      return res.status(403).json({ error: '无权限' })
+    }
+    next()
+  })
+}
+
+module.exports = { auth, optionalAuth, adminAuth };

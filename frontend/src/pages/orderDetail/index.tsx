@@ -1,27 +1,9 @@
-import { View, Text, ScrollView } from '@tarojs/components'
+import { View, Text, ScrollView, Button } from '@tarojs/components'
 import { useState, useEffect } from 'react'
-import Taro, { useRouter } from '@tarojs/taro'
+import Taro, { useRouter, useShareAppMessage } from '@tarojs/taro'
 import { orderApi } from '../../services'
+import { Order, OrderStatus, OrderStatusText } from '../../types/order'
 import './index.scss'
-
-interface OrderItem {
-  id: number
-  product_id: number
-  product_name: string
-  price: number
-  quantity: number
-}
-
-interface Order {
-  id: number
-  order_no: string
-  total_amount: number
-  status: number
-  remark: string
-  created_at: any
-  updated_at: string
-  items: OrderItem[]
-}
 
 function formatDateTime(value: any): string {
   if (value == null) return ''
@@ -49,19 +31,22 @@ function formatDateTime(value: any): string {
   return String(value)
 }
 
-const statusMap: Record<number, string> = {
-  0: '待支付',
-  1: '已支付',
-  2: '制作中',
-  3: '待取餐',
-  4: '已完成',
-  5: '已取消'
-}
-
 export default function OrderDetail() {
   const router = useRouter()
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
+
+  // 配置分享
+  useShareAppMessage(() => {
+    if (!order) {
+      return { title: '森邻酸奶订单', path: '/pages/index/index' }
+    }
+    const itemNames = order.items?.map(i => i.product_name).join('、') || ''
+    return {
+      title: `【待处理订单】${itemNames} ¥${order.total_amount}`,
+      path: `/pages/orderDetail/index?orderId=${order.id}`
+    }
+  })
 
   useEffect(() => {
     loadOrder()
@@ -75,8 +60,15 @@ export default function OrderDetail() {
       setLoading(true)
       const res = await orderApi.getById(Number(orderId))
       setOrder(res.data as Order)
-    } catch (error) {
+    } catch (error: any) {
       console.error('获取订单失败:', error)
+      const msg = error.message || '获取订单失败'
+      if (msg.includes('无权') || msg.includes('登录')) {
+        Taro.showToast({ title: msg, icon: 'none' })
+        setTimeout(() => {
+          Taro.navigateBack()
+        }, 1500)
+      }
     } finally {
       setLoading(false)
     }
@@ -84,6 +76,57 @@ export default function OrderDetail() {
 
   const goBack = () => {
     Taro.switchTab({ url: '/pages/orders/index' })
+  }
+
+  // 再来一单
+  const handleReorder = () => {
+    if (!order || !order.items || order.items.length === 0) {
+      Taro.showToast({ title: '订单商品为空', icon: 'none' })
+      return
+    }
+
+    // 将订单商品转换为购物车格式
+    const cartItems = order.items.map((item, index) => ({
+      cartId: `reorder_${order.id}_${item.product_id}_${index}`,
+      product: {
+        id: item.product_id,
+        name: item.product_name,
+        price: item.price,
+        image: '' // 订单中没有图片信息
+      },
+      quantity: item.quantity,
+      totalPrice: item.price * item.quantity
+    }))
+
+    // 存储到 checkoutCart
+    Taro.setStorageSync('checkoutCart', JSON.stringify(cartItems))
+    
+    // 跳转到确认订单页面
+    Taro.navigateTo({ url: '/pages/checkout/index?orderType=pickup' })
+  }
+
+  // 取消订单
+  const handleCancelOrder = async () => {
+    if (!order) return
+    
+    Taro.showModal({
+      title: '确认取消',
+      content: '确定要取消该订单吗？',
+      confirmText: '确定取消',
+      confirmColor: '#ff6b6b',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            await orderApi.updateStatus(order.id, OrderStatus.CANCELLED)
+            Taro.showToast({ title: '订单已取消', icon: 'success' })
+            loadOrder() // 刷新订单状态
+          } catch (error: any) {
+            console.error('取消订单失败:', error)
+            Taro.showToast({ title: error.message || '取消失败', icon: 'none' })
+          }
+        }
+      }
+    })
   }
 
   if (loading) {
@@ -129,7 +172,7 @@ export default function OrderDetail() {
       <ScrollView className='detail-content' scrollY>
         <View className='status-card'>
           <View className='status-icon'>✓</View>
-          <Text className='status-text'>{statusMap[order.status] || '未知状态'}</Text>
+          <Text className='status-text'>{OrderStatusText[order.status] || '未知状态'}</Text>
           <Text className='status-tip'>请凭订单号到店取餐</Text>
         </View>
 
@@ -141,7 +184,7 @@ export default function OrderDetail() {
           <View className='info-card'>
             <View className='info-row'>
               <Text className='info-label'>取餐门店</Text>
-              <Text className='info-value'>森林酸奶·玉溪店</Text>
+              <Text className='info-value'>森邻酸奶·玉溪店</Text>
             </View>
             <View className='info-row'>
               <Text className='info-label'>订单号</Text>
@@ -206,8 +249,17 @@ export default function OrderDetail() {
       </ScrollView>
 
       <View className='bottom-bar'>
-        <View className='btn-secondary' onClick={goBack}>返回订单列表</View>
-        <View className='btn-primary'>再来一单</View>
+        {order.status === OrderStatus.PENDING_PAYMENT ? (
+          <>
+            <View className='btn-cancel' onClick={handleCancelOrder}>取消订单</View>
+            <Button className='btn-primary btn-share' openType='share'>提醒商家</Button>
+          </>
+        ) : (
+          <>
+            <View className='btn-secondary' onClick={goBack}>返回订单列表</View>
+            <View className='btn-primary' onClick={handleReorder}>再来一单</View>
+          </>
+        )}
       </View>
     </View>
   )

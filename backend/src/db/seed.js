@@ -32,7 +32,7 @@ const products = [
   },
   {
     category: '酸奶碗',
-    name: '森林莓果酸奶碗',
+    name: '森邻莓果酸奶碗',
     description: '草莓 / 蓝莓 / 无花果 / 青提 / 燕麦脆 / 椰子脆珠',
     price: 32,
     image: 'https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?w=400&q=80',

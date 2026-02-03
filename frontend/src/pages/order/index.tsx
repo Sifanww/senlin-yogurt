@@ -34,11 +34,8 @@ export default function Order() {
   const [products, setProducts] = useState<Product[]>([])
   const [activeCategory, setActiveCategory] = useState<number | null>(null)
   const [orderType, setOrderType] = useState<'pickup' | 'delivery'>('pickup')
-  const [quantity, setQuantity] = useState(1)
   const [cart, setCart] = useState<CartItem[]>([])
   const [showCart, setShowCart] = useState(false)
-  const [showSpec, setShowSpec] = useState(false)
-  const [currentProduct, setCurrentProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const [scrollTop, setScrollTop] = useState(0)
   const isClickScroll = useRef(false)
@@ -105,6 +102,19 @@ export default function Order() {
   useDidShow(() => {
     const type = Taro.getStorageSync('orderType') as 'pickup' | 'delivery'
     if (type) setOrderType(type)
+    
+    // 检查订单是否已提交成功，如果是则清空购物车
+    const orderSubmitted = Taro.getStorageSync('orderSubmitted')
+    if (orderSubmitted) {
+      setCart([])
+      setShowCart(false)
+      Taro.removeStorageSync('orderSubmitted')
+      Taro.removeStorageSync('orderCart')
+    } else {
+      // 从 Storage 加载购物车（从详情页返回时）
+      const savedCart = Taro.getStorageSync('orderCart') || []
+      setCart(savedCart)
+    }
   })
 
   // 按分类分组商品
@@ -145,56 +155,42 @@ export default function Order() {
     }
   }
 
-  const openSpecModal = (product: Product) => {
-    setCurrentProduct(product)
-    setQuantity(1)
-    setShowSpec(true)
-  }
-
-  const closeSpecModal = () => {
-    setShowSpec(false)
-    setCurrentProduct(null)
-  }
-
-  const calculateTotal = () => {
-    if (!currentProduct) return 0
-    return currentProduct.price * quantity
-  }
-
-  const addToCart = () => {
-    if (!currentProduct) return
-    const cartItem: CartItem = {
-      cartId: `${currentProduct.id}-${Date.now()}`,
-      product: currentProduct,
-      quantity,
-      totalPrice: calculateTotal()
-    }
-    setCart(prev => [...prev, cartItem])
-    closeSpecModal()
+  // 跳转到商品详情页
+  const goProductDetail = (product: Product) => {
+    Taro.navigateTo({ url: `/pages/productDetail/index?id=${product.id}` })
   }
 
   const getCartCount = () => cart.reduce((sum, item) => sum + item.quantity, 0)
   const getCartTotal = () => cart.reduce((sum, item) => sum + item.totalPrice, 0)
 
   const updateCartItemQuantity = (cartId: string, delta: number) => {
-    setCart(prev => prev.map(item => {
-      if (item.cartId === cartId) {
-        const newQty = item.quantity + delta
-        if (newQty <= 0) return item
-        const unitPrice = item.totalPrice / item.quantity
-        return { ...item, quantity: newQty, totalPrice: unitPrice * newQty }
-      }
-      return item
-    }))
+    setCart(prev => {
+      const newCart = prev.map(item => {
+        if (item.cartId === cartId) {
+          const newQty = item.quantity + delta
+          if (newQty <= 0) return item
+          const unitPrice = item.totalPrice / item.quantity
+          return { ...item, quantity: newQty, totalPrice: unitPrice * newQty }
+        }
+        return item
+      })
+      Taro.setStorageSync('orderCart', newCart)
+      return newCart
+    })
   }
 
   const removeCartItem = (cartId: string) => {
-    setCart(prev => prev.filter(item => item.cartId !== cartId))
+    setCart(prev => {
+      const newCart = prev.filter(item => item.cartId !== cartId)
+      Taro.setStorageSync('orderCart', newCart)
+      return newCart
+    })
   }
 
   const clearCart = () => {
     setCart([])
     setShowCart(false)
+    Taro.removeStorageSync('orderCart')
   }
 
   const goCheckout = () => {
@@ -284,7 +280,7 @@ export default function Order() {
                         <Text className='price-symbol'>¥</Text>
                         {product.price}
                       </Text>
-                      <View className='select-btn' onClick={() => openSpecModal(product)}>
+                      <View className='select-btn' onClick={() => goProductDetail(product)}>
                         选规格
                       </View>
                     </View>
@@ -360,51 +356,6 @@ export default function Order() {
                 </View>
               ))}
             </ScrollView>
-          </View>
-        </View>
-      )}
-
-      {/* 规格选择弹窗 */}
-      {showSpec && currentProduct && (
-        <View className='spec-modal'>
-          <View className='spec-mask' onClick={closeSpecModal}></View>
-          <View className='spec-content'>
-            <View className='spec-header'>
-              <Image className='spec-image' src={getImageUrl(currentProduct.image)} mode='aspectFill' />
-              <View className='spec-info'>
-                <Text className='spec-name'>{currentProduct.name}</Text>
-                <Text className='spec-price'>
-                  <Text className='price-symbol'>¥</Text>
-                  {calculateTotal()}
-                </Text>
-              </View>
-              <View className='spec-close' onClick={closeSpecModal}>×</View>
-            </View>
-            <ScrollView className='spec-options' scrollY>
-              <View className='option-group'>
-                <View className='option-title'>
-                  <Text className='title-text'>数量</Text>
-                </View>
-                <View className='quantity-selector'>
-                  <View
-                    className={`qty-btn ${quantity <= 1 ? 'disabled' : ''}`}
-                    onClick={() => quantity > 1 && setQuantity(q => q - 1)}
-                  >−</View>
-                  <Text className='qty-num'>{quantity}</Text>
-                  <View className='qty-btn' onClick={() => setQuantity(q => q + 1)}>+</View>
-                </View>
-              </View>
-            </ScrollView>
-            <View className='spec-footer'>
-              <View className='total-price'>
-                <Text className='total-label'>合计</Text>
-                <Text className='total-amount'>
-                  <Text className='price-symbol'>¥</Text>
-                  {calculateTotal()}
-                </Text>
-              </View>
-              <View className='add-cart-btn' onClick={addToCart}>加入购物车</View>
-            </View>
           </View>
         </View>
       )}

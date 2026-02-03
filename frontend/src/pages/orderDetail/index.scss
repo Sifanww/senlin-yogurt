@@ -278,6 +278,26 @@
   &:active {
     background-color: #e8e8e8;
   }
+
+  &.full {
+    flex: none;
+    width: 100%;
+  }
+}
+
+.btn-cancel {
+  flex: 1;
+  padding: 24px;
+  text-align: center;
+  font-size: 30px;
+  color: #ff6b6b;
+  background-color: #fff;
+  border: 1px solid #ff6b6b;
+  border-radius: 48px;
+
+  &:active {
+    background-color: #fff5f5;
+  }
 }
 
 .btn-primary {
@@ -289,8 +309,18 @@
   font-weight: bold;
   background: linear-gradient(135deg, #a8d8a0 0%, #7bc96f 100%);
   border-radius: 48px;
+  border: none;
+  line-height: 1.2;
+
+  &::after {
+    border: none;
+  }
 
   &:active {
     opacity: 0.85;
+  }
+
+  &.btn-share {
+    background: linear-gradient(135deg, #ffb347 0%, #ff9500 100%);
   }
 }

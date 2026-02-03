@@ -54,3 +54,8 @@ export const addressApi = {
     request({ url: `/api/addresses/${id}`, method: 'PUT', data }),
   delete: (id: number) => request({ url: `/api/addresses/${id}`, method: 'DELETE' })
 }
+
+// 系统设置相关
+export const settingsApi = {
+  getPayQrCode: () => request({ url: '/api/settings/pay-qrcode' })
+}

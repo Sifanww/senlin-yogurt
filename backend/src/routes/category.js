@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const { adminAuth } = require('../middleware/auth');
 
 // 获取所有分类
 router.get('/', (req, res) => {
@@ -18,7 +19,7 @@ router.get('/:id', (req, res) => {
 });
 
 // 创建分类
-router.post('/', (req, res) => {
+router.post('/', adminAuth, (req, res) => {
   const { name, sort_order = 0 } = req.body;
   if (!name) {
     return res.status(400).json({ error: '分类名称不能为空' });
@@ -28,7 +29,7 @@ router.post('/', (req, res) => {
 });
 
 // 更新分类
-router.put('/:id', (req, res) => {
+router.put('/:id', adminAuth, (req, res) => {
   const { name, sort_order } = req.body;
   const updates = [];
   const values = [];
@@ -48,7 +49,7 @@ router.put('/:id', (req, res) => {
 });
 
 // 删除分类
-router.delete('/:id', (req, res) => {
+router.delete('/:id', adminAuth, (req, res) => {
   db.prepare('DELETE FROM categories WHERE id = ?').run(req.params.id);
   res.json({ message: '删除成功' });
 });

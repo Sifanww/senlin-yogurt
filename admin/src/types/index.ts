@@ -38,13 +38,14 @@ export interface Order {
   created_at: string
   updated_at: string
   items?: OrderItem[]
+  user_nickname?: string
 }
 
 // 订单状态
 export const ORDER_STATUS = {
   0: { text: '待支付', color: 'orange' },
-  1: { text: '已支付', color: 'blue' },
-  2: { text: '制作中', color: 'cyan' },
+  1: { text: '制作中', color: 'cyan' },
+  2: { text: '待取餐', color: 'blue' },
   3: { text: '已完成', color: 'green' },
   4: { text: '已取消', color: 'red' }
 } as const

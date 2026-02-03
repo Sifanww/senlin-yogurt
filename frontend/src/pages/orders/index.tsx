@@ -1,7 +1,8 @@
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { orderApi } from '../../services'
+import { OrderStatus, OrderStatusText } from '../../types/order'
 import './index.scss'
 
 interface OrderItem {
@@ -51,23 +52,28 @@ function formatDateTime(value: any): string {
   return String(value)
 }
 
-const statusMap: Record<number, string> = {
-  0: '待支付',
-  1: '已支付',
-  2: '制作中',
-  3: '待取餐',
-  4: '已完成',
-  5: '已取消'
-}
-
 export default function Orders() {
   const [orders, setOrders] = useState<Order[]>([])
   const [activeTab, setActiveTab] = useState<number | 'all'>('all')
   const [loading, setLoading] = useState(true)
+  const isFirstMount = useRef(true)
 
   useDidShow(() => {
     checkLoginAndLoad()
   })
+
+  // 监听 activeTab 变化，重新加载订单
+  useEffect(() => {
+    // 首次挂载时由 useDidShow 触发，跳过
+    if (isFirstMount.current) {
+      isFirstMount.current = false
+      return
+    }
+    const token = Taro.getStorageSync('token')
+    if (token) {
+      loadOrders(activeTab)
+    }
+  }, [activeTab])
 
   const checkLoginAndLoad = () => {
     const token = Taro.getStorageSync('token')
@@ -88,13 +94,13 @@ export default function Orders() {
       setLoading(false)
       return
     }
-    loadOrders()
+    loadOrders(activeTab)
   }
 
-  const loadOrders = async () => {
+  const loadOrders = async (tab: number | 'all') => {
     try {
       setLoading(true)
-      const params = activeTab === 'all' ? {} : { status: activeTab }
+      const params = tab === 'all' ? {} : { status: tab }
       const res = await orderApi.getList(params)
       setOrders(res.data || [])
     } catch (error: any) {
@@ -113,9 +119,8 @@ export default function Orders() {
   }
 
   const handleTabChange = (tab: number | 'all') => {
+    if (tab === activeTab) return
     setActiveTab(tab)
-    // 切换 tab 后重新加载
-    setTimeout(loadOrders, 0)
   }
 
   const viewOrderDetail = (orderId: number) => {
@@ -134,14 +139,14 @@ export default function Orders() {
           全部
         </View>
         <View
-          className={`tab ${activeTab === 1 ? 'active' : ''}`}
-          onClick={() => handleTabChange(1)}
+          className={`tab ${activeTab === OrderStatus.READY ? 'active' : ''}`}
+          onClick={() => handleTabChange(OrderStatus.READY)}
         >
           待取餐
         </View>
         <View
-          className={`tab ${activeTab === 4 ? 'active' : ''}`}
-          onClick={() => handleTabChange(4)}
+          className={`tab ${activeTab === OrderStatus.COMPLETED ? 'active' : ''}`}
+          onClick={() => handleTabChange(OrderStatus.COMPLETED)}
         >
           已完成
         </View>
@@ -165,9 +170,9 @@ export default function Orders() {
             <View key={order.id} className='order-card' onClick={() => viewOrderDetail(order.id)}>
               <View className='order-header'>
                 <View className='store-info'>
-                  <Text className='store-name'>森林酸奶</Text>
+                  <Text className='store-name'>森邻酸奶</Text>
                 </View>
-                <Text className='order-status'>{statusMap[order.status] || '未知'}</Text>
+                <Text className='order-status'>{OrderStatusText[order.status] || '未知'}</Text>
               </View>
 
               <View className='order-goods'>
