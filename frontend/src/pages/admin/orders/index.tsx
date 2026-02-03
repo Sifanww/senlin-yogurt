@@ -1,4 +1,4 @@
-import { View, Text } from '@tarojs/components'
+import { View, Text, Input } from '@tarojs/components'
 import { useState, useEffect } from 'react'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { orderApi } from '../../../services'
@@ -19,12 +19,17 @@ interface Order {
   remark?: string
   created_at: string
   items?: OrderItem[]
+  user_nickname?: string
+  order_type?: 'pickup' | 'delivery'
+  address_name?: string
+  address_phone?: string
+  address_detail?: string
 }
 
 const ORDER_STATUS: Record<number, { text: string; color: string }> = {
   0: { text: '待付款', color: 'pending' },
-  1: { text: '待制作', color: 'processing' },
-  2: { text: '制作中', color: 'processing' },
+  1: { text: '制作中', color: 'processing' },
+  2: { text: '待取餐', color: 'ready' },
   3: { text: '已完成', color: 'completed' },
   4: { text: '已取消', color: 'cancelled' }
 }
@@ -34,12 +39,15 @@ export default function AdminOrders() {
   const [loading, setLoading] = useState(false)
   const [statusFilter, setStatusFilter] = useState<number | undefined>()
   const [pickerVisible, setPickerVisible] = useState(false)
+  const [remarkVisible, setRemarkVisible] = useState(false)
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null)
+  const [editRemark, setEditRemark] = useState('')
 
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await orderApi.getList(statusFilter !== undefined ? { status: statusFilter } : undefined)
+      // 管理后台使用 getAdminList 获取所有订单
+      const res = await orderApi.getAdminList(statusFilter !== undefined ? { status: statusFilter } : undefined)
       setOrders(res.data || res)
     } catch {
       Taro.showToast({ title: '加载失败', icon: 'none' })
@@ -64,9 +72,12 @@ export default function AdminOrders() {
         Taro.showToast({ title: '订单不存在', icon: 'none' })
         return
       }
+      const addressInfo = detail.order_type === 'delivery' && detail.address_detail 
+        ? `\n配送地址: ${detail.address_name} ${detail.address_phone} ${detail.address_detail}` 
+        : ''
       Taro.showModal({
         title: '订单详情',
-        content: `订单号: ${detail.order_no}\n金额: ¥${detail.total_amount.toFixed(2)}\n状态: ${ORDER_STATUS[detail.status]?.text}\n备注: ${detail.remark || '无'}\n\n商品:\n${(detail.items || []).map((i: OrderItem) => `${i.product_name} x${i.quantity} ¥${(i.price * i.quantity).toFixed(2)}`).join('\n')}`,
+        content: `订单号: ${detail.order_no}\n下单人: ${(detail as any).user_nickname || '未知用户'}\n取餐方式: ${detail.order_type === 'delivery' ? '外卖配送' : '到店自提'}${addressInfo}\n金额: ¥${detail.total_amount.toFixed(2)}\n状态: ${ORDER_STATUS[detail.status]?.text}\n备注: ${detail.remark || '无'}\n\n商品:\n${(detail.items || []).map((i: OrderItem) => `${i.product_name} x${i.quantity} ¥${(i.price * i.quantity).toFixed(2)}`).join('\n')}`,
         showCancel: false
       })
     } catch {
@@ -85,6 +96,24 @@ export default function AdminOrders() {
       await orderApi.updateStatus(currentOrder.id, status)
       Taro.showToast({ title: '状态更新成功', icon: 'success' })
       setPickerVisible(false)
+      fetchData()
+    } catch {
+      Taro.showToast({ title: '更新失败', icon: 'none' })
+    }
+  }
+
+  const handleEditRemark = (order: Order) => {
+    setCurrentOrder(order)
+    setEditRemark(order.remark || '')
+    setRemarkVisible(true)
+  }
+
+  const handleSaveRemark = async () => {
+    if (!currentOrder) return
+    try {
+      await orderApi.updateRemark(currentOrder.id, editRemark)
+      Taro.showToast({ title: '备注更新成功', icon: 'success' })
+      setRemarkVisible(false)
       fetchData()
     } catch {
       Taro.showToast({ title: '更新失败', icon: 'none' })
@@ -123,6 +152,20 @@ export default function AdminOrders() {
               </View>
               <View className='order-info'>
                 <View className='info-row'>
+                  <Text className='label'>下单人</Text>
+                  <Text className='value'>{order.user_nickname || '未知用户'}</Text>
+                </View>
+                <View className='info-row'>
+                  <Text className='label'>取餐方式</Text>
+                  <Text className='value'>{order.order_type === 'delivery' ? '外卖配送' : '到店自提'}</Text>
+                </View>
+                {order.order_type === 'delivery' && order.address_detail && (
+                  <View className='info-row'>
+                    <Text className='label'>配送地址</Text>
+                    <Text className='value'>{order.address_name} {order.address_phone} {order.address_detail}</Text>
+                  </View>
+                )}
+                <View className='info-row'>
                   <Text className='label'>下单时间</Text>
                   <Text className='value'>{formatTime(order.created_at)}</Text>
                 </View>
@@ -139,6 +182,7 @@ export default function AdminOrders() {
               </View>
               <View className='order-actions'>
                 <Text className='action-btn detail' onClick={() => handleViewDetail(order)}>详情</Text>
+                <Text className='action-btn remark' onClick={() => handleEditRemark(order)}>改备注</Text>
                 <Text className='action-btn status' onClick={() => handleChangeStatus(order)}>改状态</Text>
               </View>
             </View>
@@ -158,6 +202,31 @@ export default function AdminOrders() {
               {Object.entries(ORDER_STATUS).map(([key, val]) => (
                 <View key={key} className={`option-item ${currentOrder?.status === Number(key) ? 'active' : ''}`} onClick={() => handleSelectStatus(Number(key))}>{val.text}</View>
               ))}
+            </View>
+          </View>
+        </>
+      )}
+
+      {remarkVisible && (
+        <>
+          <View className='mask' onClick={() => setRemarkVisible(false)} />
+          <View className='remark-editor'>
+            <View className='picker-header'>
+              <Text className='picker-title'>修改备注</Text>
+              <Text className='close-btn' onClick={() => setRemarkVisible(false)}>×</Text>
+            </View>
+            <View className='remark-input-wrap'>
+              <Input
+                className='remark-input'
+                value={editRemark}
+                onInput={(e) => setEditRemark(e.detail.value)}
+                placeholder='请输入备注信息'
+                maxlength={100}
+              />
+            </View>
+            <View className='remark-actions'>
+              <Text className='cancel-btn' onClick={() => setRemarkVisible(false)}>取消</Text>
+              <Text className='confirm-btn' onClick={handleSaveRemark}>保存</Text>
             </View>
           </View>
         </>

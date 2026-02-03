@@ -77,9 +77,9 @@ export default function Checkout() {
     }
   })
 
-  const loadAddresses = async (uid: number) => {
+  const loadAddresses = async (_uid?: number) => {
     try {
-      const res = await addressApi.getList(uid)
+      const res = await addressApi.getList()
       const list = res.data || []
       setAddresses(list)
       // 自动选择默认地址
@@ -129,12 +129,20 @@ export default function Checkout() {
     Taro.showLoading({ title: '提交订单中...' })
 
     try {
-      const orderData = {
+      const orderData: any = {
         items: cartItems.map(item => ({
           product_id: item.product.id,
           quantity: item.quantity
         })),
-        remark: remark || undefined
+        remark: remark || undefined,
+        order_type: orderType
+      }
+      
+      // 外卖订单添加地址信息
+      if (orderType === 'delivery' && selectedAddress) {
+        orderData.address_name = selectedAddress.name
+        orderData.address_phone = selectedAddress.phone
+        orderData.address_detail = selectedAddress.address
       }
 
       const res = await orderApi.create(orderData)

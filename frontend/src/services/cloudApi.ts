@@ -115,27 +115,53 @@ export const productApi = {
 
 // ============ 订单相关 ============
 export const orderApi = {
+  // 前台订单列表：所有用户只能看自己的订单
   getList: async (params?: { status?: number }) => {
-    const userInfo = Taro.getStorageSync('userInfo')
-    const isAdmin = userInfo?.role === 'admin'
+    const { result } = await Taro.cloud.callFunction({ name: 'getOpenId' }) as any
+    const openid = result?.openid
+    if (!openid) throw new Error('请先登录')
     
-    // 管理员可以查看所有订单，普通用户只能查看自己的
-    const where: Record<string, any> = {}
-    
-    if (!isAdmin) {
-      const { result } = await Taro.cloud.callFunction({ name: 'getOpenId' }) as any
-      const openid = result?.openid
-      if (!openid) throw new Error('请先登录')
-      where._openid = openid
-    }
-    
+    const where: Record<string, any> = { _openid: openid }
     if (params?.status !== undefined) where.status = params.status
 
     const data = await queryCollection('orders', {
-      where: Object.keys(where).length > 0 ? where : undefined,
+      where,
       orderBy: { field: 'id', order: 'desc' }
     })
     return { data }
+  },
+
+  // 管理后台订单列表：管理员可查看所有订单（含下单人信息）
+  getAdminList: async (params?: { status?: number }) => {
+    const db = getDb()
+    const where: Record<string, any> = {}
+    if (params?.status !== undefined) where.status = params.status
+
+    const orders = await queryCollection('orders', {
+      where: Object.keys(where).length > 0 ? where : undefined,
+      orderBy: { field: 'id', order: 'desc' }
+    })
+    
+    // 获取所有相关用户的 openid
+    const openids = [...new Set(orders.map((o: any) => o._openid).filter(Boolean))]
+    
+    if (openids.length > 0) {
+      // 批量查询用户信息
+      const usersRes = await db.collection('users').where({
+        _openid: db.command.in(openids)
+      }).get()
+      
+      // 构建 openid -> 用户信息 映射
+      const userMap = new Map(usersRes.data.map((u: any) => [u._openid, u]))
+      
+      // 为每个订单添加下单人信息
+      orders.forEach((order: any) => {
+        const user = userMap.get(order._openid)
+        order.user_nickname = user?.nickname || '未知用户'
+      })
+    }
+    
+    return { data: orders }
   },
 
   getById: async (id: number) => {
@@ -146,6 +172,19 @@ export const orderApi = {
     const order = orderRes.data[0]
     
     if (!order) return { data: null }
+
+    // 校验订单归属
+    const { result } = await Taro.cloud.callFunction({ name: 'getOpenId' }) as any
+    const openid = result?.openid
+    if (!openid) throw new Error('请先登录')
+    
+    const userInfo = Taro.getStorageSync('userInfo')
+    const isAdmin = userInfo?.role === 'admin'
+    
+    // 非管理员只能查看自己的订单
+    if (!isAdmin && order._openid !== openid) {
+      throw new Error('无权查看此订单')
+    }
 
     // 获取订单明细
     const itemsRes = await db.collection('order_items').where({ order_id: id }).get()
@@ -158,7 +197,14 @@ export const orderApi = {
     }
   },
 
-  create: async (data: { items: { product_id: number; quantity: number }[]; remark?: string }) => {
+  create: async (data: { 
+    items: { product_id: number; quantity: number }[]; 
+    remark?: string;
+    order_type?: 'pickup' | 'delivery';
+    address_name?: string;
+    address_phone?: string;
+    address_detail?: string;
+  }) => {
     const db = getDb()
     
     // 生成订单号
@@ -200,14 +246,22 @@ export const orderApi = {
     const newOrderId = (maxOrderRes.data[0]?.id || 0) + 1
 
     // 创建订单
-    const orderData = {
+    const orderData: Record<string, any> = {
       id: newOrderId,
       order_no: orderNo,
       total_amount: totalAmount,
       status: 0,
       remark: data.remark || '',
+      order_type: data.order_type || 'pickup',
       created_at: db.serverDate(),
       updated_at: db.serverDate()
+    }
+    
+    // 外卖订单保存地址信息
+    if (data.order_type === 'delivery') {
+      orderData.address_name = data.address_name || ''
+      orderData.address_phone = data.address_phone || ''
+      orderData.address_detail = data.address_detail || ''
     }
 
     await db.collection('orders').add({ data: orderData })
@@ -241,11 +295,59 @@ export const orderApi = {
   },
 
   updateStatus: async (id: number, status: number) => {
-    await updateRecord('orders', id, {
-      status,
-      updated_at: getDb().serverDate()
-    })
-    return { message: '更新成功' }
+    const userInfo = Taro.getStorageSync('userInfo')
+    const isAdmin = userInfo?.role === 'admin'
+    
+    if (isAdmin) {
+      // 管理员使用云函数更新（绕过数据库权限限制）
+      const { result } = await Taro.cloud.callFunction({
+        name: 'adminUpdateOrder',
+        data: {
+          orderId: id,
+          data: { status }
+        }
+      }) as any
+      
+      if (!result?.success) {
+        throw new Error(result?.error || '更新失败')
+      }
+      return { message: '更新成功' }
+    } else {
+      // 普通用户直接更新自己的订单
+      await updateRecord('orders', id, {
+        status,
+        updated_at: getDb().serverDate()
+      })
+      return { message: '更新成功' }
+    }
+  },
+
+  updateRemark: async (id: number, remark: string) => {
+    const userInfo = Taro.getStorageSync('userInfo')
+    const isAdmin = userInfo?.role === 'admin'
+    
+    if (isAdmin) {
+      // 管理员使用云函数更新
+      const { result } = await Taro.cloud.callFunction({
+        name: 'adminUpdateOrder',
+        data: {
+          orderId: id,
+          data: { remark }
+        }
+      }) as any
+      
+      if (!result?.success) {
+        throw new Error(result?.error || '更新失败')
+      }
+      return { message: '更新成功' }
+    } else {
+      // 普通用户直接更新自己的订单
+      await updateRecord('orders', id, {
+        remark,
+        updated_at: getDb().serverDate()
+      })
+      return { message: '更新成功' }
+    }
   }
 }
 

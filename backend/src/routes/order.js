@@ -22,14 +22,17 @@ router.get('/', auth, (req, res) => {
 
   const isAdmin = req.user?.role === 'admin'
 
-  let sql = 'SELECT * FROM orders'
-  const params = []
+  let sql, params = []
 
-  if (!isAdmin) {
-    sql += ' WHERE user_id = ?'
-    params.push(req.user.id)
+  if (isAdmin) {
+    // 管理员查询时关联用户信息
+    sql = `SELECT o.*, u.nickname as user_nickname 
+           FROM orders o 
+           LEFT JOIN users u ON o.user_id = u.id 
+           WHERE 1=1`
   } else {
-    sql += ' WHERE 1=1'
+    sql = 'SELECT * FROM orders WHERE user_id = ?'
+    params.push(req.user.id)
   }
 
   if (status !== undefined) {
@@ -37,7 +40,7 @@ router.get('/', auth, (req, res) => {
     params.push(status)
   }
 
-  sql += ' ORDER BY id DESC'
+  sql += ' ORDER BY o.id DESC'
 
   const orders = db.prepare(sql).all(...params)
   res.json({ data: orders })
@@ -50,7 +53,10 @@ router.get('/:id', auth, (req, res) => {
   const orderId = req.params.id
 
   const order = isAdmin
-    ? db.prepare('SELECT * FROM orders WHERE id = ?').get(orderId)
+    ? db.prepare(`SELECT o.*, u.nickname as user_nickname 
+                  FROM orders o 
+                  LEFT JOIN users u ON o.user_id = u.id 
+                  WHERE o.id = ?`).get(orderId)
     : db.prepare('SELECT * FROM orders WHERE id = ? AND user_id = ?').get(orderId, req.user.id)
 
   if (!order) {
