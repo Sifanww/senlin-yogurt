@@ -11,16 +11,20 @@ function getEnvVar(key: string): string | undefined {
   return undefined
 }
 
-// 请求/资源基础地址
-// - H5 走同域（''）
-// - 小程序开发者工具默认可用 localhost
-// - 真机调试请在 storage 中写入 BASE_URL（如 http://你的局域网IP:3000）
-const isH5 = Taro.getEnv?.() === Taro.ENV_TYPE.WEB
-const DEFAULT_BASE_URL = isH5 ? '' : 'http://localhost:3000'
-const BASE_URL =
-  (Taro.getStorageSync('BASE_URL') as string) ||
-  getEnvVar('TARO_APP_API_BASE_URL') ||
-  DEFAULT_BASE_URL
+// 延迟获取 BASE_URL，避免模块加载时调用 Taro API 导致死循环
+function getBaseUrl(): string {
+  try {
+    const isH5 = Taro.getEnv?.() === Taro.ENV_TYPE.WEB
+    const DEFAULT_BASE_URL = isH5 ? '' : 'http://localhost:3000'
+    return (
+      (Taro.getStorageSync('BASE_URL') as string) ||
+      getEnvVar('TARO_APP_API_BASE_URL') ||
+      DEFAULT_BASE_URL
+    )
+  } catch {
+    return 'http://localhost:3000'
+  }
+}
 
 // 获取完整的图片URL
 export function getImageUrl(path: string): string {
@@ -30,7 +34,10 @@ export function getImageUrl(path: string): string {
     return path
   }
   // 否则拼接BASE_URL
-  return `${BASE_URL}${path}`
+  const baseUrl = getBaseUrl()
+  // 确保 baseUrl 不为空，否则使用默认值
+  const finalBaseUrl = baseUrl || 'http://localhost:3000'
+  return `${finalBaseUrl}${path}`
 }
 
 interface RequestOptions {
@@ -47,7 +54,7 @@ export async function request<T = any>(options: RequestOptions): Promise<T> {
   
   try {
     const res = await Taro.request({
-      url: `${BASE_URL}${url}`,
+      url: `${getBaseUrl()}${url}`,
       method,
       data,
       header: {

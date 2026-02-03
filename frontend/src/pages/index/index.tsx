@@ -1,5 +1,7 @@
 import { View, Text, Swiper, SwiperItem, Image } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import { useState } from 'react'
+import Taro, { useDidShow } from '@tarojs/taro'
+import { userApi } from '../../services'
 import './index.scss'
 
 // 轮播图数据
@@ -30,18 +32,74 @@ const bannerList = [
   }
 ]
 
+interface UserInfo {
+  id: number
+  nickname: string
+  role?: string
+}
+
 export default function Index() {
+  const [user, setUser] = useState<UserInfo | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  useDidShow(() => {
+    // 从缓存读取用户信息
+    const userInfo = Taro.getStorageSync('userInfo')
+    if (userInfo) {
+      setUser(userInfo)
+      // 后台刷新用户信息（获取最新的 role）
+      userApi.getProfile().then(res => {
+        const newUser = res.data || res
+        if (newUser) {
+          Taro.setStorageSync('userInfo', newUser)
+          setUser(newUser)
+        }
+      }).catch(() => {})
+    } else {
+      setUser(null)
+    }
+  })
+
+  // 微信一键登录
+  const handleLogin = async () => {
+    setLoading(true)
+    try {
+      const res = await (userApi as any).wxLogin()
+      setUser(res.user)
+      Taro.showToast({ title: '登录成功', icon: 'success' })
+    } catch (error: any) {
+      Taro.showToast({ title: error.message || '登录失败', icon: 'none' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   // 跳转到点单页面
   const goToOrder = (type: 'pickup' | 'delivery') => {
-    // 存储订单类型到缓存
     Taro.setStorageSync('orderType', type)
-    Taro.switchTab({
-      url: '/pages/order/index'
-    })
+    Taro.switchTab({ url: '/pages/order/index' })
+  }
+
+  // 跳转到管理后台
+  const goToAdmin = () => {
+    Taro.navigateTo({ url: '/pages/admin/index/index' })
   }
 
   return (
     <View className='index'>
+      {/* 顶部用户区域 */}
+      <View className='user-bar'>
+        {user ? (
+          user.role === 'admin' && (
+            <Text className='admin-btn' onClick={goToAdmin}>管理后台</Text>
+          )
+        ) : (
+          <View className='login-area' onClick={handleLogin}>
+            <Text className='login-text'>{loading ? '登录中...' : '点击登录'}</Text>
+          </View>
+        )}
+      </View>
+
       {/* 轮播图区域 */}
       <Swiper
         className='banner-swiper'

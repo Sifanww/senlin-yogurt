@@ -1,11 +1,12 @@
 {
   "miniprogramRoot": "dist/",
   "cloudfunctionRoot": "cloud/",
+  "cloudbaseRoot": "cloud/",
   "projectname": "tempProject",
   "description": "Milk Tea Ordering",
   "appid": "wx4990b5c7fdb2ead7",
   "setting": {
-    "urlCheck": true,
+    "urlCheck": false,
     "es6": true,
     "enhance": true,
     "compileHotReLoad": false,

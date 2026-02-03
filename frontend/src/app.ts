@@ -5,6 +5,18 @@ import { initCloud } from './services/cloud'
 
 import './app.scss'
 
+// 小程序运行时没有 Node 的 process 对象，但部分依赖会读取 process.env。
+// 这里提供一个最小 polyfill，避免出现 “Can't find variable: process”。
+const __global: any =
+  (typeof globalThis !== 'undefined' && globalThis) ||
+  (typeof global !== 'undefined' && (global as any)) ||
+  (typeof window !== 'undefined' && (window as any)) ||
+  {}
+
+if (!__global.process) __global.process = { env: {} }
+if (!__global.process.env) __global.process.env = {}
+if (!__global.process.env.NODE_ENV) __global.process.env.NODE_ENV = 'production'
+
 function getEnvVar(key: string): string | undefined {
   try {
     if (typeof process !== 'undefined' && (process as any).env) {

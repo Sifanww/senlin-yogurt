@@ -1,6 +1,16 @@
 import Taro from '@tarojs/taro'
 import { getDb, queryCollection, getById, updateRecord } from './cloud'
 
+function getEnvVar(key: string): string | undefined {
+  try {
+    const env = (globalThis as any)?.process?.env
+    if (env) return env[key]
+  } catch {
+    // ignore
+  }
+  return undefined
+}
+
 // ============ 分类相关 ============
 export const categoryApi = {
   getList: async () => {
@@ -13,6 +23,37 @@ export const categoryApi = {
   getById: async (id: number) => {
     const data = await getById('categories', id)
     return { data }
+  },
+
+  create: async (data: { name: string; sort_order?: number }) => {
+    const db = getDb()
+    const maxRes = await db.collection('categories').orderBy('id', 'desc').limit(1).get()
+    const newId = (maxRes.data[0]?.id || 0) + 1
+    
+    await db.collection('categories').add({
+      data: {
+        id: newId,
+        name: data.name,
+        sort_order: data.sort_order || 0,
+        created_at: db.serverDate(),
+        updated_at: db.serverDate()
+      }
+    })
+    return { data: { id: newId } }
+  },
+
+  update: async (id: number, data: { name?: string; sort_order?: number }) => {
+    await updateRecord('categories', id, {
+      ...data,
+      updated_at: getDb().serverDate()
+    })
+    return { message: '更新成功' }
+  },
+
+  delete: async (id: number) => {
+    const db = getDb() as any
+    await db.collection('categories').where({ id }).remove()
+    return { message: '删除成功' }
   }
 }
 
@@ -33,25 +74,65 @@ export const productApi = {
   getById: async (id: number) => {
     const data = await getById('products', id)
     return { data }
+  },
+
+  create: async (data: { category_id: number; name: string; price: number; description?: string; image?: string; stock?: number; status?: number }) => {
+    const db = getDb()
+    const maxRes = await db.collection('products').orderBy('id', 'desc').limit(1).get()
+    const newId = (maxRes.data[0]?.id || 0) + 1
+    
+    await db.collection('products').add({
+      data: {
+        id: newId,
+        category_id: data.category_id,
+        name: data.name,
+        price: data.price,
+        description: data.description || '',
+        image: data.image || '',
+        stock: data.stock || 0,
+        status: data.status ?? 1,
+        created_at: db.serverDate(),
+        updated_at: db.serverDate()
+      }
+    })
+    return { data: { id: newId } }
+  },
+
+  update: async (id: number, data: any) => {
+    await updateRecord('products', id, {
+      ...data,
+      updated_at: getDb().serverDate()
+    })
+    return { message: '更新成功' }
+  },
+
+  delete: async (id: number) => {
+    const db = getDb() as any
+    await db.collection('products').where({ id }).remove()
+    return { message: '删除成功' }
   }
 }
 
 // ============ 订单相关 ============
 export const orderApi = {
   getList: async (params?: { status?: number }) => {
-    // 获取当前用户 openid
-    const { result } = await Taro.cloud.callFunction({ name: 'getOpenId' }) as any
-    const openid = result?.openid
+    const userInfo = Taro.getStorageSync('userInfo')
+    const isAdmin = userInfo?.role === 'admin'
     
-    if (!openid) {
-      throw new Error('请先登录')
+    // 管理员可以查看所有订单，普通用户只能查看自己的
+    const where: Record<string, any> = {}
+    
+    if (!isAdmin) {
+      const { result } = await Taro.cloud.callFunction({ name: 'getOpenId' }) as any
+      const openid = result?.openid
+      if (!openid) throw new Error('请先登录')
+      where._openid = openid
     }
-
-    const where: Record<string, any> = { _openid: openid }
+    
     if (params?.status !== undefined) where.status = params.status
 
     const data = await queryCollection('orders', {
-      where,
+      where: Object.keys(where).length > 0 ? where : undefined,
       orderBy: { field: 'id', order: 'desc' }
     })
     return { data }
@@ -298,19 +379,72 @@ export const addressApi = {
 }
 
 // ============ 系统设置相关 ============
-// 收款码存储在本地后端，需要通过 HTTP 请求获取
 export const settingsApi = {
+  // 获取收款二维码
   getPayQrCode: async () => {
-    // 从本地后端获取收款码配置
     try {
-      const res = await Taro.request({
-        url: `${process.env.TARO_APP_API_BASE_URL || 'http://localhost:3000'}/api/settings/pay-qrcode`,
-        method: 'GET'
-      })
-      return res.data
+      const db = getDb()
+      const res = await db.collection('settings').where({ key: 'pay_qrcode' }).limit(1).get()
+      const setting = res.data[0]
+      
+      if (setting?.value) {
+        let qrcodeUrl = setting.value
+        // 如果是云存储 fileID，需要获取临时访问链接
+        if (qrcodeUrl.startsWith('cloud://') && Taro.cloud) {
+          const tempRes = await Taro.cloud.getTempFileURL({
+            fileList: [qrcodeUrl]
+          })
+          qrcodeUrl = tempRes.fileList[0]?.tempFileURL || qrcodeUrl
+        }
+        return { data: { qrcode: qrcodeUrl } }
+      }
+      return { data: { qrcode: '' } }
     } catch (err) {
       console.error('获取收款码失败:', err)
-      return { data: { url: '' } }
+      return { data: { qrcode: '' } }
+    }
+  },
+
+  // 上传收款二维码
+  uploadPayQrCode: async (filePath: string) => {
+    try {
+      // 上传图片到云存储
+      const cloudPath = `pay-qrcode/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`
+      const uploadRes = await Taro.cloud.uploadFile({
+        cloudPath,
+        filePath
+      })
+      
+      const fileID = uploadRes.fileID
+      
+      // 保存到云数据库
+      const db = getDb()
+      const existRes = await db.collection('settings').where({ key: 'pay_qrcode' }).limit(1).get()
+      
+      if (existRes.data.length > 0) {
+        // 更新现有记录
+        await (db.collection('settings') as any).where({ key: 'pay_qrcode' }).update({
+          data: {
+            value: fileID,
+            updated_at: db.serverDate()
+          }
+        })
+      } else {
+        // 创建新记录
+        await db.collection('settings').add({
+          data: {
+            key: 'pay_qrcode',
+            value: fileID,
+            created_at: db.serverDate(),
+            updated_at: db.serverDate()
+          }
+        })
+      }
+      
+      return { data: { url: fileID } }
+    } catch (err) {
+      console.error('上传收款码失败:', err)
+      throw new Error('上传失败')
     }
   }
 }

@@ -82,7 +82,11 @@ export async function updateRecord(
   data: Record<string, any>
 ): Promise<void> {
   const db = getDb() as any
-  await db.collection(collection).where({ id }).update({ data })
+  const res = await db.collection(collection).where({ id }).update({ data })
+  console.log(`更新 ${collection} id=${id} 结果:`, res)
+  if (res.stats?.updated === 0) {
+    console.warn(`警告: 没有记录被更新，请检查数据库权限设置`)
+  }
 }
 
 // 删除记录

@@ -53,7 +53,7 @@ router.post('/login', (req, res) => {
     
     const hashedPassword = hashPassword(password);
     const user = db.prepare(
-      'SELECT id, phone, nickname, avatar, points FROM users WHERE phone = ? AND password = ?'
+      'SELECT id, phone, nickname, avatar, points, role FROM users WHERE phone = ? AND password = ?'
     ).get(phone, hashedPassword);
     
     if (!user) {
@@ -76,7 +76,7 @@ router.get('/profile', (req, res) => {
     }
     
     const userId = token.split('_').pop();
-    const user = db.prepare('SELECT id, phone, nickname, avatar, points FROM users WHERE id = ?').get(userId);
+    const user = db.prepare('SELECT id, phone, nickname, avatar, points, role FROM users WHERE id = ?').get(userId);
     
     if (!user) {
       return res.status(401).json({ error: '用户不存在' });

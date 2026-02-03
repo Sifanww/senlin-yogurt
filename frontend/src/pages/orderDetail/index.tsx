@@ -83,8 +83,8 @@ export default function OrderDetail() {
   const loadPayQrCode = async () => {
     try {
       const res = await settingsApi.getPayQrCode()
-      if (res.data?.url) {
-        setPayQrCode(res.data.url)
+      if (res.data?.qrcode) {
+        setPayQrCode(res.data.qrcode)
       }
     } catch (err) {
       console.error('获取收款码失败:', err)
