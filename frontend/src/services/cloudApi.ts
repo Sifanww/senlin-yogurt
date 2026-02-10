@@ -507,6 +507,55 @@ export const settingsApi = {
     }
   },
 
+  // 获取"我的"页面背景图
+  getMeBgImage: async () => {
+    try {
+      const db = getDb()
+      const res = await db.collection('settings').where({ key: 'me_bg_image' }).limit(1).get()
+      const setting = res.data[0]
+
+      if (setting?.value) {
+        let url = setting.value
+        if (url.startsWith('cloud://') && Taro.cloud) {
+          const tempRes = await Taro.cloud.getTempFileURL({ fileList: [url] })
+          url = tempRes.fileList[0]?.tempFileURL || url
+        }
+        return { data: { url } }
+      }
+      return { data: { url: '' } }
+    } catch (err) {
+      console.error('获取背景图失败:', err)
+      return { data: { url: '' } }
+    }
+  },
+
+  // 上传"我的"页面背景图
+  uploadMeBgImage: async (filePath: string) => {
+    try {
+      const cloudPath = `me-bg/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`
+      const uploadRes = await Taro.cloud.uploadFile({ cloudPath, filePath })
+      const fileID = uploadRes.fileID
+
+      const db = getDb()
+      const existRes = await db.collection('settings').where({ key: 'me_bg_image' }).limit(1).get()
+
+      if (existRes.data.length > 0) {
+        await (db.collection('settings') as any).where({ key: 'me_bg_image' }).update({
+          data: { value: fileID, updated_at: db.serverDate() }
+        })
+      } else {
+        await db.collection('settings').add({
+          data: { key: 'me_bg_image', value: fileID, created_at: db.serverDate(), updated_at: db.serverDate() }
+        })
+      }
+
+      return { data: { url: fileID } }
+    } catch (err) {
+      console.error('上传背景图失败:', err)
+      throw new Error('上传失败')
+    }
+  },
+
   // 上传收款二维码
   uploadPayQrCode: async (filePath: string) => {
     try {

@@ -4,36 +4,60 @@
   padding-bottom: 120px;
 
   .header-bg {
-    height: 300px;
+    height: 360px;
     position: relative;
     overflow: hidden;
 
     .bg-image {
       width: 100%;
       height: 100%;
-      filter: blur(2px);
-    }
-
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 100px;
-      background: linear-gradient(transparent, #f5f5f5);
     }
   }
 
   .member-card {
     margin: -80px 24px 24px;
-    background: #fff;
+    background: transparent;
     border-radius: 16px;
     padding: 32px;
+    padding-top: 0;
     position: relative;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+
+    // 渐变透明遮罩，上半部分透明渐变到白色
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 120px;
+      background: linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.6) 40%, #fff 100%);
+      border-radius: 16px 16px 0 0;
+      z-index: 0;
+    }
+
+    // 白色底部背景
+    &::after {
+      content: '';
+      position: absolute;
+      top: 120px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #fff;
+      z-index: 0;
+    }
+
+    // 确保内容在伪元素之上
+    .card-header,
+    .card-stats,
+    .login-prompt {
+      position: relative;
+      z-index: 1;
+    }
 
     .card-header {
+      padding-top: 80px;
       .user-info {
         display: flex;
         align-items: center;
@@ -97,6 +121,7 @@
       flex-direction: column;
       align-items: center;
       padding: 20px 0;
+      padding-top: 80px;
 
       .prompt-text {
         font-size: 28px;

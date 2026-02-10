@@ -42,6 +42,26 @@ router.get('/pay-qrcode', (req, res) => {
   res.json({ data: { url: settings.payQrCode || '' } });
 });
 
+// 获取"我的"页面背景图
+router.get('/me-bg-image', (req, res) => {
+  const settings = getSettings();
+  res.json({ data: { url: settings.meBgImage || '' } });
+});
+
+// 更新"我的"页面背景图
+router.put('/me-bg-image', adminAuth, (req, res) => {
+  try {
+    const { url } = req.body;
+    const settings = getSettings();
+    settings.meBgImage = url;
+    saveSettings(settings);
+    res.json({ data: { url }, message: '背景图更新成功' });
+  } catch (err) {
+    console.error('更新背景图失败:', err);
+    res.status(500).json({ error: '更新失败', message: err.message });
+  }
+});
+
 // 更新收款码
 router.put('/pay-qrcode', adminAuth, (req, res) => {
   try {

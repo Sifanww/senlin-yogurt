@@ -1,3 +1,4 @@
+import Taro from '@tarojs/taro'
 import request from './request'
 
 // 分类相关
@@ -57,5 +58,36 @@ export const addressApi = {
 
 // 系统设置相关
 export const settingsApi = {
-  getPayQrCode: () => request({ url: '/api/settings/pay-qrcode' })
+  getPayQrCode: () => request({ url: '/api/settings/pay-qrcode' }),
+  getMeBgImage: () => request({ url: '/api/settings/me-bg-image' }),
+  uploadMeBgImage: async (filePath: string) => {
+    const token = Taro.getStorageSync('token')
+    const res = await Taro.uploadFile({
+      url: `${Taro.getStorageSync('BASE_URL') || 'http://localhost:3000'}/api/upload`,
+      filePath,
+      name: 'file',
+      header: token ? { Authorization: `Bearer ${token}` } : {}
+    })
+    const data = JSON.parse(res.data)
+    if (data.data?.url) {
+      await request({ url: '/api/settings/me-bg-image', method: 'PUT', data: { url: data.data.url } })
+      return { data: { url: data.data.url } }
+    }
+    throw new Error('上传失败')
+  },
+  uploadPayQrCode: async (filePath: string) => {
+    const token = Taro.getStorageSync('token')
+    const res = await Taro.uploadFile({
+      url: `${Taro.getStorageSync('BASE_URL') || 'http://localhost:3000'}/api/upload`,
+      filePath,
+      name: 'file',
+      header: token ? { Authorization: `Bearer ${token}` } : {}
+    })
+    const data = JSON.parse(res.data)
+    if (data.data?.url) {
+      await request({ url: '/api/settings/pay-qrcode', method: 'PUT', data: { url: data.data.url } })
+      return { data: { url: data.data.url } }
+    }
+    throw new Error('上传失败')
+  }
 }
