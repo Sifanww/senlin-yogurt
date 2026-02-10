@@ -20,7 +20,7 @@
   position: relative;
 
   &.active {
-    color: #7bc96f;
+    color: #000000;
     font-weight: bold;
 
     &::after {
@@ -31,7 +31,7 @@
       transform: translateX(-50%);
       width: 40px;
       height: 4px;
-      background-color: #7bc96f;
+      background-color: #000000;
       border-radius: 2px;
     }
   }
@@ -67,8 +67,8 @@
     padding: 20px 60px;
     font-size: 28px;
     color: #fff;
-    background: linear-gradient(135deg, #a8d8a0 0%, #7bc96f 100%);
-    border-radius: 40px;
+    background: #000000;
+    border-radius: 5px;
   }
 }
 
@@ -101,7 +101,7 @@
 
   .order-type {
     font-size: 22px;
-    color: #7bc96f;
+    color: #000000;
     background-color: #f0f9ed;
     padding: 4px 12px;
     border-radius: 4px;
@@ -110,7 +110,7 @@
 
 .order-status {
   font-size: 28px;
-  color: #7bc96f;
+  color: #000000;
   font-weight: 500;
 }
 
@@ -225,7 +225,7 @@
 .action-btn {
   padding: 16px 32px;
   font-size: 26px;
-  border-radius: 32px;
+  border-radius: 5px;
 
   &.secondary {
     color: #666;
@@ -237,8 +237,8 @@
   }
 
   &.primary {
-    color: #7bc96f;
-    border: 1px solid #7bc96f;
+    color: #000000;
+    border: 1px solid #000000;
     background-color: #fff;
 
     &:active {
