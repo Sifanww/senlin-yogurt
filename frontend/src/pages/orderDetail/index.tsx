@@ -171,7 +171,7 @@ export default function OrderDetail() {
 
       <ScrollView className='detail-content' scrollY>
         <View className='status-card'>
-          <View className='status-icon'>···</View>
+          {!order.pickup_number && <View className='status-icon'>···</View>}
           <Text className='status-text'>{OrderStatusText[order.status] || '未知状态'}</Text>
           {order.pickup_number && (
             <View className='pickup-number-wrap'>
@@ -208,6 +208,9 @@ export default function OrderDetail() {
               <View key={item.id} className='goods-item'>
                 <View className='goods-info'>
                   <Text className='goods-name'>{item.product_name}</Text>
+                  {item.modifiers && item.modifiers !== '默认配置' && (
+                    <Text className='goods-spec'>{item.modifiers}</Text>
+                  )}
                   <View className='goods-bottom'>
                     <Text className='goods-price'>¥{item.price}</Text>
                     <Text className='goods-qty'>x{item.quantity}</Text>

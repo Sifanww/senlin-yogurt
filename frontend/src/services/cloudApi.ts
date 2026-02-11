@@ -206,7 +206,7 @@ export const orderApi = {
   },
 
   create: async (data: { 
-    items: { product_id: number; quantity: number }[]; 
+    items: { product_id: number; quantity: number; modifiers?: string }[]; 
     remark?: string;
     order_type?: 'pickup' | 'delivery';
     address_name?: string;
@@ -242,7 +242,8 @@ export const orderApi = {
         product_id: item.product_id,
         product_name: product.name,
         price: product.price,
-        quantity: item.quantity
+        quantity: item.quantity,
+        modifiers: item.modifiers || ''
       })
     }
 

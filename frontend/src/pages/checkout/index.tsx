@@ -132,7 +132,8 @@ export default function Checkout() {
       const orderData: any = {
         items: cartItems.map(item => ({
           product_id: item.product.id,
-          quantity: item.quantity
+          quantity: item.quantity,
+          modifiers: item.product.description || ''
         })),
         remark: remark || undefined,
         order_type: orderType

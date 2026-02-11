@@ -58,6 +58,15 @@ export interface Product {
   updated_at: string
 }
 
+export interface OrderItem {
+  id: number
+  product_id: number
+  product_name: string
+  price: number
+  quantity: number
+  modifiers?: string
+}
+
 export interface Order {
   id: number
   order_no: string

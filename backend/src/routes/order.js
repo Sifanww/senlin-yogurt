@@ -123,8 +123,8 @@ router.post('/', auth, (req, res) => {
     for (const item of items) {
       const product = db.prepare('SELECT * FROM products WHERE id = ?').get(item.product_id);
       db.prepare(
-        'INSERT INTO order_items (order_id, product_id, product_name, price, quantity) VALUES (?, ?, ?, ?, ?)'
-      ).run(orderId, item.product_id, product.name, product.price, item.quantity);
+        'INSERT INTO order_items (order_id, product_id, product_name, price, quantity, modifiers) VALUES (?, ?, ?, ?, ?, ?)'
+      ).run(orderId, item.product_id, product.name, product.price, item.quantity, item.modifiers || '');
     }
     
     return { id: orderId, order_no: orderNo, total_amount: totalAmount };

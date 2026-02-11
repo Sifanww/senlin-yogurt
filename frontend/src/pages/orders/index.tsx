@@ -11,6 +11,7 @@ interface OrderItem {
   product_name: string
   price: number
   quantity: number
+  modifiers?: string
 }
 
 interface Order {

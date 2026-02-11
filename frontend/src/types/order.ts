@@ -23,6 +23,7 @@ export interface OrderItem {
   product_name: string
   price: number
   quantity: number
+  modifiers?: string
 }
 
 // 订单

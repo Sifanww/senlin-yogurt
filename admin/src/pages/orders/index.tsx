@@ -103,6 +103,7 @@ export default function Orders() {
               rowKey="id"
               columns={[
                 { title: '商品', dataIndex: 'product_name' },
+                { title: '配置', dataIndex: 'modifiers', render: (v: string) => v || '-' },
                 { title: '单价', dataIndex: 'price', render: (v: number) => `¥${v.toFixed(2)}` },
                 { title: '数量', dataIndex: 'quantity' },
                 { title: '小计', render: (_, r) => `¥${(r.price * r.quantity).toFixed(2)}` }
