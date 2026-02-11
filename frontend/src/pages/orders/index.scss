@@ -20,7 +20,7 @@
   position: relative;
 
   &.active {
-    color: #000000;
+    color: #000;
     font-weight: bold;
 
     &::after {
@@ -31,7 +31,7 @@
       transform: translateX(-50%);
       width: 40px;
       height: 4px;
-      background-color: #000000;
+      background-color: #000;
       border-radius: 2px;
     }
   }
@@ -67,7 +67,7 @@
     padding: 20px 60px;
     font-size: 28px;
     color: #fff;
-    background: #000000;
+    background: #000;
     border-radius: 5px;
   }
 }
@@ -76,182 +76,95 @@
 .order-card {
   background-color: #fff;
   border-radius: 20px;
-  padding: 28px;
+  padding: 32px;
   margin-bottom: 24px;
 }
 
-.order-header {
+// 通用行
+.card-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 20px;
+}
+
+// 第一行：店铺名 + 状态
+.card-header {
+  margin-bottom: 12px;
+
+  .store-name {
+    font-size: 32px;
+    color: #333;
+    font-weight: bold;
+  }
+
+  .order-status {
+    font-size: 28px;
+    color: #666;
+    font-weight: 400;
+  }
+}
+
+// 第二行：时间
+.card-time {
+  display: block;
+  font-size: 24px;
+  color: #999;
+  margin-bottom: 24px;
+}
+
+// 第三行：商品明细 + 价格汇总
+.card-body {
+  align-items: flex-start;
+  padding: 24px 0;
+  border-top: 1px solid #f5f5f5;
   border-bottom: 1px solid #f5f5f5;
 }
 
-.store-info {
-  display: flex;
-  align-items: center;
-
-  .store-name {
-    font-size: 30px;
-    color: #333;
-    font-weight: bold;
-    margin-right: 16px;
-  }
-
-  .order-type {
-    font-size: 22px;
-    color: #000000;
-    background-color: #f0f9ed;
-    padding: 4px 12px;
-    border-radius: 4px;
-  }
-}
-
-.order-status {
-  font-size: 28px;
-  color: #000000;
-  font-weight: 500;
-}
-
-// 商品列表
-.order-goods {
-  padding: 20px 0;
-}
-
-.goods-item {
-  display: flex;
-  align-items: center;
-  padding: 12px 0;
-}
-
-.goods-image {
-  width: 100px;
-  height: 100px;
-  border-radius: 12px;
-  margin-right: 20px;
-  flex-shrink: 0;
-}
-
-.goods-info {
+.card-items {
   flex: 1;
   min-width: 0;
 
-  .goods-name {
-    font-size: 28px;
-    color: #333;
+  .card-item-name {
     display: block;
-    margin-bottom: 8px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .pickup-number {
-    display: block;
-    font-size: 40px;
-    font-weight: bold;
-    color: #000;
-    margin-bottom: 8px;
-  }
-
-  .goods-spec {
-    font-size: 24px;
-    color: #999;
-    display: block;
+    font-size: 26px;
+    color: #666;
+    line-height: 1.6;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 }
 
-.goods-right {
+.card-summary {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  margin-left: 16px;
+  flex-shrink: 0;
+  margin-left: 24px;
 
-  .goods-price {
-    font-size: 28px;
+  .card-price {
+    font-size: 36px;
     color: #333;
-    font-weight: 500;
+    font-weight: bold;
   }
 
-  .goods-qty {
+  .card-qty {
     font-size: 24px;
     color: #999;
     margin-top: 4px;
   }
 }
 
-.more-goods {
-  font-size: 24px;
-  color: #999;
-  padding: 12px 0;
-}
-
-// 订单底部
-.order-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 0;
-  border-top: 1px solid #f5f5f5;
-  border-bottom: 1px solid #f5f5f5;
-}
-
-.order-time {
-  font-size: 24px;
-  color: #999;
-}
-
-.order-total {
-  display: flex;
-  align-items: baseline;
-
-  .total-label {
-    font-size: 24px;
-    color: #666;
-    margin-right: 8px;
-  }
-
-  .total-price {
-    font-size: 32px;
-    color: #ff6b6b;
-    font-weight: bold;
-  }
-}
-
-// 操作按钮
-.order-actions {
+// 第四行：取餐码
+.card-bottom {
   display: flex;
   justify-content: flex-end;
-  gap: 20px;
-  padding-top: 20px;
-}
+  padding-top: 24px;
 
-.action-btn {
-  padding: 16px 32px;
-  font-size: 26px;
-  border-radius: 5px;
-
-  &.secondary {
-    color: #666;
-    background-color: #f5f5f5;
-
-    &:active {
-      background-color: #e8e8e8;
-    }
-  }
-
-  &.primary {
-    color: #000000;
-    border: 1px solid #000000;
-    background-color: #fff;
-
-    &:active {
-      background-color: #f0f9ed;
-    }
+  .card-pickup {
+    font-size: 32px;
+    font-weight: bold;
+    color: #000;
   }
 }
 

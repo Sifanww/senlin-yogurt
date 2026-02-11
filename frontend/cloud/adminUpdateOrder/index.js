@@ -4,14 +4,14 @@ const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 
-// 生成取餐号：当天日期 + 顺序号 001-999
+// 生成取餐码：当天日期 + 顺序号 001-999
 async function generatePickupNumber() {
   const now = new Date()
   const dateStr = now.getFullYear().toString() +
     (now.getMonth() + 1).toString().padStart(2, '0') +
     now.getDate().toString().padStart(2, '0')
 
-  // 查询当天已分配的最大取餐号
+  // 查询当天已分配的最大取餐码
   const res = await db.collection('orders')
     .where({
       pickup_number: db.RegExp({ regexp: '^' + dateStr, options: '' })
@@ -58,9 +58,9 @@ exports.main = async (event, context) => {
       updated_at: db.serverDate()
     }
 
-    // 当状态变为"待取餐"(2)时，自动生成取餐号
+    // 当状态变为"待取餐"(2)时，自动生成取餐码
     if (data.status === 2) {
-      // 先查询当前订单是否已有取餐号
+      // 先查询当前订单是否已有取餐码
       const orderRes = await db.collection('orders').where({ id: orderId }).limit(1).get()
       const order = orderRes.data[0]
       if (order && !order.pickup_number) {

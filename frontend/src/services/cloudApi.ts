@@ -117,6 +117,7 @@ export const productApi = {
 export const orderApi = {
   // 前台订单列表：所有用户只能看自己的订单
   getList: async (params?: { status?: number }) => {
+    const db = getDb()
     const { result } = await Taro.cloud.callFunction({ name: 'getOpenId' }) as any
     const openid = result?.openid
     if (!openid) throw new Error('请先登录')
@@ -128,6 +129,13 @@ export const orderApi = {
       where,
       orderBy: { field: 'id', order: 'desc' }
     })
+
+    // 为每个订单查询商品明细
+    for (const order of data) {
+      const itemsRes = await db.collection('order_items').where({ order_id: order.id }).get()
+      order.items = itemsRes.data || []
+    }
+
     return { data }
   },
 

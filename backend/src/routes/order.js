@@ -16,7 +16,7 @@ function generateOrderNo() {
   return timestamp + random;
 }
 
-// 生成取餐号：当天日期 + 顺序号 001-999
+// 生成取餐码：当天日期 + 顺序号 001-999
 function generatePickupNumber() {
   const now = new Date();
   const dateStr = now.getFullYear().toString() +
@@ -63,6 +63,13 @@ router.get('/', auth, (req, res) => {
   sql += ' ORDER BY o.id DESC'
 
   const orders = db.prepare(sql).all(...params)
+
+  // 为每个订单附带商品明细
+  const stmtItems = db.prepare('SELECT * FROM order_items WHERE order_id = ?')
+  for (const order of orders) {
+    order.items = stmtItems.all(order.id)
+  }
+
   res.json({ data: orders })
 });
 
@@ -150,7 +157,7 @@ router.put('/:id/status', auth, (req, res) => {
     }
   }
 
-  // 当状态变为"待取餐"(2)且尚未分配取餐号时，自动生成取餐号
+  // 当状态变为"待取餐"(2)且尚未分配取餐码时，自动生成取餐码
   if (Number(status) === 2 && !order.pickup_number) {
     const pickupNumber = generatePickupNumber();
     db.prepare('UPDATE orders SET status = ?, pickup_number = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')

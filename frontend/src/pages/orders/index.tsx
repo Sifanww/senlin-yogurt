@@ -167,40 +167,47 @@ export default function Orders() {
             </View>
           </View>
         ) : (
-          orders.map(order => (
-            <View key={order.id} className='order-card' onClick={() => viewOrderDetail(order.id)}>
-              <View className='order-header'>
-                <View className='store-info'>
+          orders.map(order => {
+            const totalQty = order.items?.reduce((sum, item) => sum + item.quantity, 0) || 0
+            return (
+              <View key={order.id} className='order-card' onClick={() => viewOrderDetail(order.id)}>
+                {/* 第一行：店铺名 + 状态 */}
+                <View className='card-row card-header'>
                   <Text className='store-name'>森邻酸奶</Text>
+                  <Text className='order-status'>{OrderStatusText[order.status] || '未知'} ›</Text>
                 </View>
-                <Text className='order-status'>{OrderStatusText[order.status] || '未知'}</Text>
-              </View>
 
-              <View className='order-goods'>
-                <View className='goods-item'>
-                  <View className='goods-info'>
-                    <Text className='goods-name'>订单号: {order.order_no}</Text>
-                    {order.pickup_number && (
-                      <Text className='pickup-number'>取餐号: {order.pickup_number.slice(-3)}</Text>
+                {/* 第二行：时间 */}
+                <Text className='card-time'>{formatDateTime(order.created_at)}</Text>
+
+                {/* 第三行：商品明细 + 价格/数量 */}
+                <View className='card-row card-body'>
+                  <View className='card-items'>
+                    {order.items && order.items.length > 0 ? (
+                      order.items.map((item, idx) => (
+                        <Text key={idx} className='card-item-name'>
+                          {item.product_name} x{item.quantity}
+                        </Text>
+                      ))
+                    ) : (
+                      <Text className='card-item-name'>订单号: {order.order_no}</Text>
                     )}
-                    <Text className='goods-spec'>金额: ¥{order.total_amount}</Text>
+                  </View>
+                  <View className='card-summary'>
+                    <Text className='card-price'>¥{order.total_amount}</Text>
+                    <Text className='card-qty'>共{totalQty}件</Text>
                   </View>
                 </View>
-              </View>
 
-              <View className='order-footer'>
-                <Text className='order-time'>{formatDateTime(order.created_at)}</Text>
-                <View className='order-total'>
-                  <Text className='total-label'>实付</Text>
-                  <Text className='total-price'>¥{order.total_amount}</Text>
-                </View>
+                {/* 第四行：取餐码 */}
+                {order.pickup_number && (
+                  <View className='card-bottom'>
+                    <Text className='card-pickup'>取餐码: {order.pickup_number.slice(-3)}</Text>
+                  </View>
+                )}
               </View>
-
-              <View className='order-actions'>
-                <View className='action-btn primary'>查看详情</View>
-              </View>
-            </View>
-          ))
+            )
+          })
         )}
 
         <View className='bottom-placeholder'></View>

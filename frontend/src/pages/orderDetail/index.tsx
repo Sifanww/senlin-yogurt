@@ -175,7 +175,7 @@ export default function OrderDetail() {
           <Text className='status-text'>{OrderStatusText[order.status] || '未知状态'}</Text>
           {order.pickup_number && (
             <View className='pickup-number-wrap'>
-              <Text className='pickup-label'>取餐号</Text>
+              <Text className='pickup-label'>取餐码</Text>
               <Text className='pickup-number'>{order.pickup_number.slice(-3)}</Text>
             </View>
           )}
