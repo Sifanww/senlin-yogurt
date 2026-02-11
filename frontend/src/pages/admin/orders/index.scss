@@ -28,7 +28,7 @@
       color: #666;
 
       &.active {
-        background: #7bc96f;
+        background: #000000;
         color: #fff;
       }
     }
@@ -131,7 +131,7 @@
 
         .action-btn {
           padding: 12px 24px;
-          border-radius: 8px;
+          border-radius: 5px;
           font-size: 26px;
 
           &.detail {
@@ -145,7 +145,7 @@
           }
 
           &.status {
-            background: #7bc96f;
+            background: #000000;
             color: #fff;
           }
         }
@@ -201,7 +201,7 @@
 
       &.active {
         background: #f6ffed;
-        color: #7bc96f;
+        color: #000000;
       }
     }
   }
@@ -279,7 +279,7 @@
     }
 
     .confirm-btn {
-      background: #7bc96f;
+      background: #000000;
       color: #fff;
     }
   }

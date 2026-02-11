@@ -171,9 +171,8 @@ export default function OrderDetail() {
 
       <ScrollView className='detail-content' scrollY>
         <View className='status-card'>
-          <View className='status-icon'>✓</View>
+          <View className='status-icon'>···</View>
           <Text className='status-text'>{OrderStatusText[order.status] || '未知状态'}</Text>
-          <Text className='status-tip'>请凭订单号到店取餐</Text>
         </View>
 
         <View className='section'>

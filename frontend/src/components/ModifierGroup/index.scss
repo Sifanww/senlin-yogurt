@@ -1,0 +1,127 @@
+.modifier-group {
+  background-color: #fff;
+  padding: 32px;
+  margin-bottom: 20px;
+
+  &__header {
+    margin-bottom: 24px;
+  }
+
+  &__title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  &__title {
+    font-size: 32px;
+    color: #333;
+    font-weight: bold;
+  }
+
+  &__required {
+    font-size: 24px;
+    color: #ff6b6b;
+    padding: 4px 16px;
+    background-color: #fff5f5;
+    border-radius: 8px;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__subtitle {
+    font-size: 26px;
+    color: #999;
+  }
+
+  &__progress {
+    font-size: 24px;
+    color: #999;
+  }
+
+  &__options {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+.modifier-option {
+  display: flex;
+  align-items: center;
+  padding: 24px;
+  border-radius: 12px;
+  background-color: #f8f8f8;
+  position: relative;
+
+  &--active {
+    background-color: #fff5f5;
+  }
+
+  &--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  // 选中指示器
+  &__indicator {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 20px;
+    flex-shrink: 0;
+  }
+
+  &--active &__indicator {
+    border-color: #ff6b6b;
+  }
+
+  // 多选时指示器改为圆角方形
+  &--check &__indicator {
+    border-radius: 8px;
+  }
+
+  &__dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: #ff6b6b;
+  }
+
+  &--check &__dot {
+    border-radius: 4px;
+  }
+
+  &__name {
+    flex: 1;
+    font-size: 28px;
+    color: #333;
+  }
+
+  &__price {
+    font-size: 26px;
+    color: #ff6b6b;
+    font-weight: bold;
+    margin-left: 16px;
+  }
+
+  &__badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 20px;
+    color: #fff;
+    background-color: #ccc;
+    padding: 2px 10px;
+    border-radius: 0 12px 0 8px;
+  }
+}

@@ -57,7 +57,7 @@
   
   .default-tag {
     font-size: 22px;
-    color: #7bc96f;
+    color: #000000;
     background: #f0f9ed;
     padding: 4px 12px;
     border-radius: 8px;
@@ -103,14 +103,14 @@
   line-height: 88px;
   font-size: 30px;
   color: #fff;
-  background: linear-gradient(135deg, #a8d8a0 0%, #7bc96f 100%);
-  border-radius: 44px;
+  background: #000000;
+  border-radius: 5px;
   border: none;
   
   &.parse {
     background: #fff;
-    color: #7bc96f;
-    border: 2px solid #7bc96f;
+    color: #000000;
+    border: 2px solid #000000;
   }
 }
 
@@ -239,7 +239,7 @@
   transition: background 0.3s;
   
   &.on {
-    background: #7bc96f;
+    background: #000000;
     
     .switch-handle {
       transform: translateX(44px);
@@ -268,8 +268,8 @@
     line-height: 88px;
     font-size: 32px;
     color: #fff;
-    background: linear-gradient(135deg, #a8d8a0 0%, #7bc96f 100%);
-    border-radius: 44px;
+    background: #000000;
+    border-radius: 5px;
     border: none;
   }
 }

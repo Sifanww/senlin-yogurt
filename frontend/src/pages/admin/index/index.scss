@@ -3,54 +3,29 @@
   background: #f5f5f5;
   min-height: 100vh;
 
-  .header {
-    background: linear-gradient(135deg, #7bc96f 0%, #52c41a 100%);
-    border-radius: 16px;
-    padding: 32px;
-    margin-bottom: 24px;
-    color: #fff;
-
-    .welcome {
-      font-size: 28px;
-      opacity: 0.9;
-      margin-bottom: 8px;
-    }
-
-    .title {
-      font-size: 40px;
-      font-weight: bold;
-    }
-  }
-
   .menu-grid {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 20px;
 
     .menu-item {
-      width: calc(50% - 10px);
+      width: 100%;
       background: #fff;
       border-radius: 16px;
       padding: 32px 24px;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
 
       .icon {
         font-size: 56px;
-        margin-bottom: 16px;
+        margin-right: 24px;
       }
 
       .name {
         font-size: 30px;
         font-weight: 500;
         color: #333;
-        margin-bottom: 8px;
-      }
-
-      .desc {
-        font-size: 24px;
-        color: #999;
       }
     }
   }
@@ -77,7 +52,7 @@
         .stat-value {
           font-size: 40px;
           font-weight: bold;
-          color: #7bc96f;
+          color: #000000;
         }
 
         .stat-label {
@@ -92,7 +67,7 @@
   .logout-btn {
     margin-top: 40px;
     background: #fff;
-    border-radius: 12px;
+    border-radius: 5px;
     padding: 24px;
     text-align: center;
     color: #ff4d4f;

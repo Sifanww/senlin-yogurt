@@ -13,7 +13,6 @@ interface Stats {
 
 export default function AdminHome() {
   const [stats, setStats] = useState<Stats>({ orders: 0, products: 0, categories: 0, todayOrders: 0 })
-  const userInfo = Taro.getStorageSync('userInfo')
 
   const fetchStats = async () => {
     try {
@@ -80,17 +79,11 @@ export default function AdminHome() {
 
   return (
     <View className='admin-home'>
-      <View className='header'>
-        <Text className='welcome'>欢迎回来</Text>
-        <Text className='title'>{userInfo?.nickname || '管理员'}</Text>
-      </View>
-
       <View className='menu-grid'>
         {menuItems.map((item, index) => (
           <View key={index} className='menu-item' onClick={() => handleNavigate(item.path)}>
             <Text className='icon'>{item.icon}</Text>
             <Text className='name'>{item.name}</Text>
-            <Text className='desc'>{item.desc}</Text>
           </View>
         ))}
       </View>

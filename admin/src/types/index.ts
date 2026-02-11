@@ -6,6 +6,41 @@ export interface Category {
   updated_at: string
 }
 
+// ---- 商品规格/定制相关类型 ----
+
+export type SkuMode = 'single' | 'multi'
+export type CtrlType = 'tags' | 'list' | 'stepper'
+
+export interface ModifierOption {
+  id: string
+  name: string
+  price: number
+  sold_out?: boolean
+}
+
+export interface ModifierRules {
+  min: number
+  max: number
+}
+
+export interface ModifierGroup {
+  id: string
+  title: string
+  desc?: string
+  ctrl_type: CtrlType
+  rules: ModifierRules
+  options: ModifierOption[]
+}
+
+export interface Sku {
+  id: string
+  name: string
+  price: number
+  original_price?: number
+  stock?: number
+  sold_out?: boolean
+}
+
 export interface Product {
   id: number
   category_id: number
@@ -16,6 +51,9 @@ export interface Product {
   image: string
   stock: number
   status: number
+  sku_mode: SkuMode
+  skus: Sku[]
+  modifier_groups: ModifierGroup[]
   created_at: string
   updated_at: string
 }

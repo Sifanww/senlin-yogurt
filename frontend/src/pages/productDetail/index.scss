@@ -1,4 +1,3 @@
-// 商品详情页样式
 .product-detail-page {
   min-height: 100vh;
   background-color: #f8f8f8;
@@ -15,16 +14,31 @@
   color: #999;
 }
 
-// 商品图片
-.product-image-wrap {
-  width: 100%;
-  height: 560px;
+// 场景切换（测试用）
+.scene-switch {
+  display: flex;
+  gap: 16px;
+  padding: 24px 32px;
   background-color: #fff;
+  margin-bottom: 20px;
 }
 
-.product-image {
-  width: 100%;
-  height: 100%;
+.scene-btn {
+  flex: 1;
+  text-align: center;
+  padding: 16px 0;
+  font-size: 26px;
+  color: #666;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  border: 2px solid transparent;
+
+  &--active {
+    color: #ff6b6b;
+    background-color: #fff5f5;
+    border-color: #ff6b6b;
+    font-weight: bold;
+  }
 }
 
 // 商品信息
@@ -117,60 +131,4 @@
   font-weight: bold;
   min-width: 80px;
   text-align: center;
-}
-
-// 底部操作栏
-.bottom-bar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  padding: 20px 32px;
-  padding-bottom: calc(20px + env(safe-area-inset-bottom));
-  background-color: #fff;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
-}
-
-.total-info {
-  flex: 1;
-  display: flex;
-  align-items: baseline;
-}
-
-.total-label {
-  font-size: 28px;
-  color: #666;
-  margin-right: 12px;
-}
-
-.total-price {
-  display: flex;
-  align-items: baseline;
-
-  .price-symbol {
-    font-size: 28px;
-    color: #ff6b6b;
-    font-weight: bold;
-  }
-
-  .price-value {
-    font-size: 48px;
-    color: #ff6b6b;
-    font-weight: bold;
-  }
-}
-
-.add-cart-btn {
-  padding: 24px 64px;
-  font-size: 32px;
-  color: #fff;
-  font-weight: bold;
-  background: linear-gradient(135deg, #a8d8a0 0%, #7bc96f 100%);
-  border-radius: 48px;
-
-  &:active {
-    opacity: 0.85;
-  }
 }

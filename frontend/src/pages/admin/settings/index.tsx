@@ -6,9 +6,11 @@ import './index.scss'
 
 export default function AdminSettings() {
   const [qrcode, setQrcode] = useState('')
+  const [bgImage, setBgImage] = useState('')
 
   useEffect(() => {
     fetchQrcode()
+    fetchBgImage()
   }, [])
 
   const fetchQrcode = async () => {
@@ -20,6 +22,17 @@ export default function AdminSettings() {
       }
     } catch (e) {
       console.error('获取收款码失败', e)
+    }
+  }
+
+  const fetchBgImage = async () => {
+    try {
+      const res = await settingsApi.getMeBgImage()
+      const data = res.data || res
+      const url = data?.url || data?.data?.url
+      if (url) setBgImage(url)
+    } catch (e) {
+      console.error('获取背景图失败', e)
     }
   }
 
@@ -35,6 +48,30 @@ export default function AdminSettings() {
           const url = uploadRes.data?.url
           if (url) {
             setQrcode(url)
+            Taro.showToast({ title: '上传成功', icon: 'success' })
+          }
+        } catch (err) {
+          console.error('上传失败', err)
+          Taro.showToast({ title: '上传失败', icon: 'none' })
+        } finally {
+          Taro.hideLoading()
+        }
+      }
+    })
+  }
+
+  const handleUploadBgImage = () => {
+    Taro.chooseImage({
+      count: 1,
+      success: async (res) => {
+        const tempFilePath = res.tempFilePaths[0]
+
+        Taro.showLoading({ title: '上传中...' })
+        try {
+          const uploadRes = await settingsApi.uploadMeBgImage(tempFilePath)
+          const url = uploadRes.data?.url
+          if (url) {
+            setBgImage(url)
             Taro.showToast({ title: '上传成功', icon: 'success' })
           }
         } catch (err) {
@@ -75,6 +112,21 @@ export default function AdminSettings() {
             <Text className='arrow'>›</Text>
           </View>
         </View>
+      </View>
+
+      <View className='qrcode-section'>
+        <Text className='section-title'>「我的」页面背景图</Text>
+        {bgImage ? (
+          <Image className='bg-preview-image' src={bgImage} mode='aspectFill' onClick={handleUploadBgImage} />
+        ) : (
+          <View className='bg-preview-image' onClick={handleUploadBgImage}>
+            <Text style={{ lineHeight: '200px', color: '#999' }}>点击上传</Text>
+          </View>
+        )}
+        <View className='upload-btn' onClick={handleUploadBgImage}>
+          {bgImage ? '更换背景图' : '上传背景图'}
+        </View>
+        <Text className='tip'>用于「我的」页面顶部背景展示</Text>
       </View>
 
       <View className='qrcode-section'>
