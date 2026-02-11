@@ -47,6 +47,9 @@ export const productApi = {
     image?: string
     stock?: number
     status?: number
+    sku_mode?: string
+    skus?: any[]
+    modifier_groups?: any[]
   }) => api.post('/products', data),
   update: (id: number, data: Partial<{
     category_id: number
@@ -56,6 +59,9 @@ export const productApi = {
     image: string
     stock: number
     status: number
+    sku_mode: string
+    skus: any[]
+    modifier_groups: any[]
   }>) => api.put(`/products/${id}`, data),
   delete: (id: number) => api.delete(`/products/${id}`)
 }

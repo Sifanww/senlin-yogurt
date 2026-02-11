@@ -3,6 +3,14 @@ const router = express.Router();
 const db = require('../db');
 const { adminAuth } = require('../middleware/auth');
 
+// 解析 JSON 字段
+function parseProductJson(product) {
+  if (!product) return product;
+  try { product.skus = JSON.parse(product.skus || '[]'); } catch { product.skus = []; }
+  try { product.modifier_groups = JSON.parse(product.modifier_groups || '[]'); } catch { product.modifier_groups = []; }
+  return product;
+}
+
 // 获取商品列表
 router.get('/', (req, res) => {
   const { category_id, status } = req.query;
@@ -13,7 +21,7 @@ router.get('/', (req, res) => {
   if (status !== undefined) { sql += ' AND p.status = ?'; params.push(status); }
   
   sql += ' ORDER BY p.id DESC';
-  const products = db.prepare(sql).all(...params);
+  const products = db.prepare(sql).all(...params).map(parseProductJson);
   res.json({ data: products });
 });
 
@@ -23,24 +31,24 @@ router.get('/:id', (req, res) => {
   if (!product) {
     return res.status(404).json({ error: '商品不存在' });
   }
-  res.json({ data: product });
+  res.json({ data: parseProductJson(product) });
 });
 
 // 创建商品
 router.post('/', adminAuth, (req, res) => {
-  const { category_id, name, description, price, image, stock = 0, status = 1 } = req.body;
+  const { category_id, name, description, price, image, stock = 0, status = 1, sku_mode = 'single', skus = [], modifier_groups = [] } = req.body;
   if (!category_id || !name || price === undefined) {
     return res.status(400).json({ error: '缺少必填字段' });
   }
   const result = db.prepare(
-    'INSERT INTO products (category_id, name, description, price, image, stock, status) VALUES (?, ?, ?, ?, ?, ?, ?)'
-  ).run(category_id, name, description, price, image, stock, status);
+    'INSERT INTO products (category_id, name, description, price, image, stock, status, sku_mode, skus, modifier_groups) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+  ).run(category_id, name, description, price, image, stock, status, sku_mode, JSON.stringify(skus), JSON.stringify(modifier_groups));
   res.json({ data: { id: result.lastInsertRowid } });
 });
 
 // 更新商品
 router.put('/:id', adminAuth, (req, res) => {
-  const { category_id, name, description, price, image, stock, status } = req.body;
+  const { category_id, name, description, price, image, stock, status, sku_mode, skus, modifier_groups } = req.body;
   const updates = [];
   const values = [];
   
@@ -51,6 +59,9 @@ router.put('/:id', adminAuth, (req, res) => {
   if (image !== undefined) { updates.push('image = ?'); values.push(image); }
   if (stock !== undefined) { updates.push('stock = ?'); values.push(stock); }
   if (status !== undefined) { updates.push('status = ?'); values.push(status); }
+  if (sku_mode !== undefined) { updates.push('sku_mode = ?'); values.push(sku_mode); }
+  if (skus !== undefined) { updates.push('skus = ?'); values.push(JSON.stringify(skus)); }
+  if (modifier_groups !== undefined) { updates.push('modifier_groups = ?'); values.push(JSON.stringify(modifier_groups)); }
   
   if (updates.length === 0) {
     return res.status(400).json({ error: '没有要更新的字段' });
