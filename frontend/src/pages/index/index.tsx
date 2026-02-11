@@ -80,20 +80,11 @@ export default function Index() {
     Taro.switchTab({ url: '/pages/order/index' })
   }
 
-  // 跳转到管理后台
-  const goToAdmin = () => {
-    Taro.navigateTo({ url: '/pages/admin/index/index' })
-  }
-
   return (
     <View className='index'>
       {/* 顶部用户区域 */}
       <View className='user-bar'>
-        {user ? (
-          user.role === 'admin' && (
-            <Text className='admin-btn' onClick={goToAdmin}>管理后台</Text>
-          )
-        ) : (
+        {!user && (
           <View className='login-area' onClick={handleLogin}>
             <Text className='login-text'>{loading ? '登录中...' : '点击登录'}</Text>
           </View>

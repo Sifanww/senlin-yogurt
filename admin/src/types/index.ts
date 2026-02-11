@@ -58,18 +58,24 @@ export interface Product {
   updated_at: string
 }
 
-export interface OrderItem {
+export interface Order {
   id: number
-  order_id: number
-  product_id: number
-  product_name: string
-  price: number
-  quantity: number
+  order_no: string
+  pickup_number?: string
+  total_amount: number
+  status: number
+  remark: string
+  created_at: string
+  updated_at: string
+  items?: OrderItem[]
+  user_nickname?: string
 }
+
 
 export interface Order {
   id: number
   order_no: string
+  pickup_number?: string
   total_amount: number
   status: number
   remark: string

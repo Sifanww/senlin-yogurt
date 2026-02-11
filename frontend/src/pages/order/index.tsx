@@ -20,6 +20,9 @@ interface Product {
   image: string
   stock: number
   category_name: string
+  sku_mode?: string
+  skus?: any[]
+  modifier_groups?: any[]
 }
 
 interface CartItem {
@@ -155,6 +158,40 @@ export default function Order() {
     }
   }
 
+  // 判断商品是否有定制化配置（多规格 SKU 或属性组）
+  const hasCustomization = (product: Product) => {
+    const hasSkus = product.sku_mode === 'multi' && Array.isArray(product.skus) && product.skus.length > 0
+    const hasModifiers = Array.isArray(product.modifier_groups) && product.modifier_groups.length > 0
+    return hasSkus || hasModifiers
+  }
+
+  // 直接加入购物车（无定制化的简单商品）
+  const addToCartDirectly = (product: Product) => {
+    setCart(prev => {
+      // 查找购物车中是否已有同一商品（无定制化，按 product.id 匹配）
+      const existing = prev.find(item => item.product.id === product.id && !item.cartId.includes('_custom_'))
+      let newCart: CartItem[]
+      if (existing) {
+        newCart = prev.map(item =>
+          item.cartId === existing.cartId
+            ? { ...item, quantity: item.quantity + 1, totalPrice: product.price * (item.quantity + 1) }
+            : item
+        )
+      } else {
+        const cartItem: CartItem = {
+          cartId: `${product.id}_${Date.now()}`,
+          product,
+          quantity: 1,
+          totalPrice: product.price,
+        }
+        newCart = [...prev, cartItem]
+      }
+      Taro.setStorageSync('orderCart', newCart)
+      return newCart
+    })
+    Taro.showToast({ title: '已加入购物车', icon: 'success', duration: 1000 })
+  }
+
   // 跳转到商品详情页
   const goProductDetail = (product: Product) => {
     Taro.navigateTo({ url: `/pages/productDetail/index?id=${product.id}` })
@@ -280,9 +317,15 @@ export default function Order() {
                         <Text className='price-symbol'>¥</Text>
                         {product.price}
                       </Text>
-                      <View className='select-btn' onClick={() => goProductDetail(product)}>
-                        选规格
-                      </View>
+                      {hasCustomization(product) ? (
+                        <View className='select-btn' onClick={() => goProductDetail(product)}>
+                          选规格
+                        </View>
+                      ) : (
+                        <View className='select-btn add-cart-btn' onClick={() => addToCartDirectly(product)}>
+                          加入购物车
+                        </View>
+                      )}
                     </View>
                   </View>
                 </View>
@@ -333,6 +376,9 @@ export default function Order() {
                   <Image className='cart-item-image' src={getImageUrl(item.product.image)} mode='aspectFill' />
                   <View className='cart-item-info'>
                     <Text className='cart-item-name'>{item.product.name}</Text>
+                    {item.product.description && item.product.description !== '默认配置' && (
+                      <Text className='cart-item-spec'>{item.product.description}</Text>
+                    )}
                     <View className='cart-item-bottom'>
                       <Text className='cart-item-price'>
                         <Text className='price-symbol'>¥</Text>

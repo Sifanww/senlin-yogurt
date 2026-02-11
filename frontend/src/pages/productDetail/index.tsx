@@ -19,7 +19,7 @@ export default function ProductDetail() {
     const id = router.params.id
     if (!id) {
       Taro.showToast({ title: '商品不存在', icon: 'none' })
-      setTimeout(() => Taro.navigateBack(), 1500)
+      setTimeout(() => Taro.switchTab({ url: '/pages/order/index' }), 1500)
       return
     }
     loadProduct(Number(id))
@@ -32,7 +32,7 @@ export default function ProductDetail() {
       const data = res.data
       if (!data) {
         Taro.showToast({ title: '商品不存在', icon: 'none' })
-        setTimeout(() => Taro.navigateBack(), 1500)
+        setTimeout(() => Taro.switchTab({ url: '/pages/order/index' }), 1500)
         return
       }
       // 将后端数据映射为前端 Product 类型
@@ -109,7 +109,7 @@ function ProductDetailContent({ product }: { product: Product }) {
     Taro.setStorageSync('orderCart', savedCart)
 
     Taro.showToast({ title: '已加入购物车', icon: 'success' })
-    setTimeout(() => Taro.navigateBack(), 1000)
+    setTimeout(() => Taro.switchTab({ url: '/pages/order/index' }), 1000)
   }
 
   return (

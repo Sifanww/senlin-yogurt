@@ -16,6 +16,27 @@ function generateOrderNo() {
   return timestamp + random;
 }
 
+// 生成取餐号：当天日期 + 顺序号 001-999
+function generatePickupNumber() {
+  const now = new Date();
+  const dateStr = now.getFullYear().toString() +
+    (now.getMonth() + 1).toString().padStart(2, '0') +
+    now.getDate().toString().padStart(2, '0');
+
+  const latest = db.prepare(
+    "SELECT pickup_number FROM orders WHERE pickup_number LIKE ? ORDER BY pickup_number DESC LIMIT 1"
+  ).get(dateStr + '%');
+
+  let seq = 1;
+  if (latest && latest.pickup_number) {
+    const lastSeq = parseInt(latest.pickup_number.slice(-3), 10);
+    seq = lastSeq + 1;
+    if (seq > 999) seq = 999;
+  }
+
+  return dateStr + seq.toString().padStart(3, '0');
+}
+
 // 获取订单列表（需要登录，只返回当前用户的订单）
 router.get('/', auth, (req, res) => {
   const { status } = req.query;
@@ -25,18 +46,17 @@ router.get('/', auth, (req, res) => {
   let sql, params = []
 
   if (isAdmin) {
-    // 管理员查询时关联用户信息
     sql = `SELECT o.*, u.nickname as user_nickname 
            FROM orders o 
            LEFT JOIN users u ON o.user_id = u.id 
            WHERE 1=1`
   } else {
-    sql = 'SELECT * FROM orders WHERE user_id = ?'
+    sql = 'SELECT * FROM orders o WHERE o.user_id = ?'
     params.push(req.user.id)
   }
 
   if (status !== undefined) {
-    sql += ' AND status = ?'
+    sql += ' AND o.status = ?'
     params.push(status)
   }
 
@@ -48,7 +68,6 @@ router.get('/', auth, (req, res) => {
 
 // 获取订单详情（需要登录，只能查看自己的订单）
 router.get('/:id', auth, (req, res) => {
-
   const isAdmin = req.user?.role === 'admin'
   const orderId = req.params.id
 
@@ -79,7 +98,6 @@ router.post('/', auth, (req, res) => {
   const orderNo = generateOrderNo();
   let totalAmount = 0;
 
-  // 计算总金额
   for (const item of items) {
     const product = db.prepare('SELECT * FROM products WHERE id = ?').get(item.product_id);
     if (!product) {
@@ -88,7 +106,6 @@ router.post('/', auth, (req, res) => {
     totalAmount += product.price * item.quantity;
   }
 
-  // 事务处理
   const insertOrder = db.transaction(() => {
     const orderResult = db.prepare(
       'INSERT INTO orders (order_no, user_id, total_amount, remark) VALUES (?, ?, ?, ?)'
@@ -117,7 +134,7 @@ router.put('/:id/status', auth, (req, res) => {
     return res.status(400).json({ error: '状态不能为空' });
   }
 
-  const order = db.prepare('SELECT id, user_id, status FROM orders WHERE id = ?').get(req.params.id)
+  const order = db.prepare('SELECT id, user_id, status, pickup_number FROM orders WHERE id = ?').get(req.params.id)
   if (!order) {
     return res.status(404).json({ error: '订单不存在' })
   }
@@ -127,11 +144,18 @@ router.put('/:id/status', auth, (req, res) => {
     if (order.user_id !== req.user.id) {
       return res.status(403).json({ error: '无权限' })
     }
-    // 普通用户仅允许取消订单（兼容 4/5 两种“已取消”状态编码）
     const cancelCodes = new Set([4, 5])
     if (!cancelCodes.has(Number(status))) {
       return res.status(403).json({ error: '无权限' })
     }
+  }
+
+  // 当状态变为"待取餐"(2)且尚未分配取餐号时，自动生成取餐号
+  if (Number(status) === 2 && !order.pickup_number) {
+    const pickupNumber = generatePickupNumber();
+    db.prepare('UPDATE orders SET status = ?, pickup_number = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+      .run(status, pickupNumber, req.params.id);
+    return res.json({ message: '更新成功', pickup_number: pickupNumber });
   }
 
   db.prepare('UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(status, req.params.id)

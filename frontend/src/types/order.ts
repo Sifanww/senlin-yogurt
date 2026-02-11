@@ -29,6 +29,7 @@ export interface OrderItem {
 export interface Order {
   id: number
   order_no: string
+  pickup_number?: string
   total_amount: number
   status: OrderStatus
   remark: string

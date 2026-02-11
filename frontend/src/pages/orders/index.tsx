@@ -16,6 +16,7 @@ interface OrderItem {
 interface Order {
   id: number
   order_no: string
+  pickup_number?: string
   total_amount: number
   status: number
   remark: string
@@ -179,6 +180,9 @@ export default function Orders() {
                 <View className='goods-item'>
                   <View className='goods-info'>
                     <Text className='goods-name'>订单号: {order.order_no}</Text>
+                    {order.pickup_number && (
+                      <Text className='pickup-number'>取餐号: {order.pickup_number.slice(-3)}</Text>
+                    )}
                     <Text className='goods-spec'>金额: ¥{order.total_amount}</Text>
                   </View>
                 </View>

@@ -174,7 +174,8 @@
     .modal-body {
       padding: 24px;
       max-height: 60vh;
-      overflow-y: auto;
+      box-sizing: border-box;
+      width: 100%;
 
       .form-item {
         margin-bottom: 24px;
@@ -347,6 +348,8 @@
     align-items: center;
     gap: 12px;
     margin-bottom: 12px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   &__input {
@@ -438,6 +441,8 @@
 
   &__body {
     padding: 20px 24px;
+    box-sizing: border-box;
+    width: 100%;
   }
 }
 

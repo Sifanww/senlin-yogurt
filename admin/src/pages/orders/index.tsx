@@ -91,6 +91,7 @@ export default function Orders() {
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="总金额">¥{currentOrder.total_amount.toFixed(2)}</Descriptions.Item>
+              <Descriptions.Item label="取餐号">{currentOrder.pickup_number ? currentOrder.pickup_number.slice(-3) : '-'}</Descriptions.Item>
               <Descriptions.Item label="下单时间">{dayjs(currentOrder.created_at).format('YYYY-MM-DD HH:mm:ss')}</Descriptions.Item>
               <Descriptions.Item label="备注" span={2}>{currentOrder.remark || '-'}</Descriptions.Item>
             </Descriptions>
