@@ -133,6 +133,8 @@ export default function Checkout() {
         items: cartItems.map(item => ({
           product_id: item.product.id,
           quantity: item.quantity,
+          price: item.product.price,
+          sku_id: (item.product as any).sku_id || undefined,
           modifiers: item.product.description || ''
         })),
         remark: remark || undefined,

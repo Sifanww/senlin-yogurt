@@ -110,7 +110,17 @@ router.post('/', auth, (req, res) => {
     if (!product) {
       return res.status(400).json({ error: `商品ID ${item.product_id} 不存在` });
     }
-    totalAmount += product.price * item.quantity;
+
+    // 优先使用前端传入的单价（含 SKU / 属性加价），否则回退到商品基础价格
+    let unitPrice = product.price;
+    if (item.price != null) {
+      unitPrice = item.price;
+    } else if (item.sku_id) {
+      // 如果传了 sku_id 但没传 price，从数据库查 SKU 价格
+      const sku = db.prepare('SELECT price FROM product_skus WHERE id = ? AND product_id = ?').get(item.sku_id, item.product_id);
+      if (sku) unitPrice = sku.price;
+    }
+    totalAmount += unitPrice * item.quantity;
   }
 
   const insertOrder = db.transaction(() => {
@@ -122,9 +132,17 @@ router.post('/', auth, (req, res) => {
     
     for (const item of items) {
       const product = db.prepare('SELECT * FROM products WHERE id = ?').get(item.product_id);
+      // 使用与上面总价计算一致的单价逻辑
+      let unitPrice = product.price;
+      if (item.price != null) {
+        unitPrice = item.price;
+      } else if (item.sku_id) {
+        const sku = db.prepare('SELECT price FROM product_skus WHERE id = ? AND product_id = ?').get(item.sku_id, item.product_id);
+        if (sku) unitPrice = sku.price;
+      }
       db.prepare(
         'INSERT INTO order_items (order_id, product_id, product_name, price, quantity, modifiers) VALUES (?, ?, ?, ?, ?, ?)'
-      ).run(orderId, item.product_id, product.name, product.price, item.quantity, item.modifiers || '');
+      ).run(orderId, item.product_id, product.name, unitPrice, item.quantity, item.modifiers || '');
     }
     
     return { id: orderId, order_no: orderNo, total_amount: totalAmount };

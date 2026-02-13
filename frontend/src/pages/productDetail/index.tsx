@@ -89,15 +89,16 @@ function ProductDetailContent({ product }: { product: Product }) {
   } = useProductSelection(product)
 
   const handleAddToCart = () => {
-    // 构建购物车项
+    // 构建购物车项，price 使用实际选中 SKU 的单价（含属性加价）
     const cartItem = {
-      cartId: `${product.id}_${Date.now()}`,
+      cartId: `${product.id}_custom_${Date.now()}`,
       product: {
         id: Number(product.id),
         name: product.name,
         description: buildDescription(product, selectedSkuId, selectedModifiers),
-        price: product.base_price,
+        price: priceBreakdown.unit_total,
         image: product.image || '',
+        sku_id: selectedSkuId || undefined,
       },
       quantity,
       totalPrice: priceBreakdown.total,

@@ -206,7 +206,7 @@ export const orderApi = {
   },
 
   create: async (data: { 
-    items: { product_id: number; quantity: number; modifiers?: string }[]; 
+    items: { product_id: number; quantity: number; price?: number; sku_id?: string; modifiers?: string }[]; 
     remark?: string;
     order_type?: 'pickup' | 'delivery';
     address_name?: string;
@@ -237,11 +237,11 @@ export const orderApi = {
         throw new Error(`商品 ${item.product_id} 不存在`)
       }
 
-      totalAmount += product.price * item.quantity
+      totalAmount += (item.price ?? product.price) * item.quantity
       orderItems.push({
         product_id: item.product_id,
         product_name: product.name,
-        price: product.price,
+        price: item.price ?? product.price,
         quantity: item.quantity,
         modifiers: item.modifiers || ''
       })

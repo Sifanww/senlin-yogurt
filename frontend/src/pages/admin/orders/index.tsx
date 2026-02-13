@@ -9,6 +9,7 @@ interface OrderItem {
   product_name: string
   price: number
   quantity: number
+  modifiers?: string
 }
 
 interface Order {
@@ -40,6 +41,8 @@ export default function AdminOrders() {
   const [statusFilter, setStatusFilter] = useState<number | undefined>()
   const [pickerVisible, setPickerVisible] = useState(false)
   const [remarkVisible, setRemarkVisible] = useState(false)
+  const [detailVisible, setDetailVisible] = useState(false)
+  const [detailOrder, setDetailOrder] = useState<Order | null>(null)
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null)
   const [editRemark, setEditRemark] = useState('')
 
@@ -72,14 +75,8 @@ export default function AdminOrders() {
         Taro.showToast({ title: '订单不存在', icon: 'none' })
         return
       }
-      const addressInfo = detail.order_type === 'delivery' && detail.address_detail 
-        ? `\n配送地址: ${detail.address_name} ${detail.address_phone} ${detail.address_detail}` 
-        : ''
-      Taro.showModal({
-        title: '订单详情',
-        content: `订单号: ${detail.order_no}\n下单人: ${(detail as any).user_nickname || '未知用户'}\n取餐方式: ${detail.order_type === 'delivery' ? '外卖配送' : '到店自提'}${addressInfo}\n金额: ¥${detail.total_amount.toFixed(2)}\n状态: ${ORDER_STATUS[detail.status]?.text}\n备注: ${detail.remark || '无'}\n\n商品:\n${(detail.items || []).map((i: OrderItem) => `${i.product_name} x${i.quantity} ¥${(i.price * i.quantity).toFixed(2)}`).join('\n')}`,
-        showCancel: false
-      })
+      setDetailOrder(detail)
+      setDetailVisible(true)
     } catch {
       Taro.showToast({ title: '获取详情失败', icon: 'none' })
     }
@@ -227,6 +224,67 @@ export default function AdminOrders() {
             <View className='remark-actions'>
               <Text className='cancel-btn' onClick={() => setRemarkVisible(false)}>取消</Text>
               <Text className='confirm-btn' onClick={handleSaveRemark}>保存</Text>
+            </View>
+          </View>
+        </>
+      )}
+
+      {detailVisible && detailOrder && (
+        <>
+          <View className='mask' onClick={() => setDetailVisible(false)} />
+          <View className='detail-modal'>
+            <View className='picker-header'>
+              <Text className='picker-title'>订单详情</Text>
+              <Text className='close-btn' onClick={() => setDetailVisible(false)}>×</Text>
+            </View>
+            <View className='detail-body'>
+              <View className='detail-row'>
+                <Text className='detail-label'>订单号</Text>
+                <Text className='detail-value'>{detailOrder.order_no}</Text>
+              </View>
+              <View className='detail-row'>
+                <Text className='detail-label'>下单人</Text>
+                <Text className='detail-value'>{(detailOrder as any).user_nickname || '未知用户'}</Text>
+              </View>
+              <View className='detail-row'>
+                <Text className='detail-label'>取餐方式</Text>
+                <Text className='detail-value'>{detailOrder.order_type === 'delivery' ? '外卖配送' : '到店自提'}</Text>
+              </View>
+              {detailOrder.order_type === 'delivery' && detailOrder.address_detail && (
+                <View className='detail-row'>
+                  <Text className='detail-label'>配送地址</Text>
+                  <Text className='detail-value'>{detailOrder.address_name} {detailOrder.address_phone} {detailOrder.address_detail}</Text>
+                </View>
+              )}
+              <View className='detail-row'>
+                <Text className='detail-label'>金额</Text>
+                <Text className='detail-value price'>¥{detailOrder.total_amount.toFixed(2)}</Text>
+              </View>
+              <View className='detail-row'>
+                <Text className='detail-label'>状态</Text>
+                <Text className={`detail-value status-tag ${ORDER_STATUS[detailOrder.status]?.color}`}>{ORDER_STATUS[detailOrder.status]?.text}</Text>
+              </View>
+              <View className='detail-row'>
+                <Text className='detail-label'>备注</Text>
+                <Text className='detail-value'>{detailOrder.remark || '无'}</Text>
+              </View>
+              <View className='detail-divider' />
+              <Text className='detail-section-title'>商品明细</Text>
+              {(detailOrder.items || []).map((item, idx) => (
+                <View key={idx} className='detail-goods-item'>
+                  <View className='goods-main'>
+                    <Text className='goods-name'>{item.product_name}</Text>
+                    <Text className='goods-subtotal'>¥{(item.price * item.quantity).toFixed(2)}</Text>
+                  </View>
+                  {item.modifiers && item.modifiers !== '默认配置' && (
+                    <Text className='goods-modifiers'>{item.modifiers}</Text>
+                  )}
+                  <View className='goods-meta'>
+                    <Text className='goods-price'>¥{item.price.toFixed(2)}</Text>
+                    <Text className='goods-qty'>x{item.quantity}</Text>
+                  </View>
+                </View>
+              ))}
             </View>
           </View>
         </>
