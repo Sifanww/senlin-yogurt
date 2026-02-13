@@ -1,8 +1,8 @@
-import { View, Text, Image } from '@tarojs/components'
+import { View, Text } from '@tarojs/components'
 import { useState, useEffect } from 'react'
 import Taro, { useRouter } from '@tarojs/taro'
 import { productApi } from '../../services'
-import { getImageUrl } from '../../services'
+import CloudImage from '../../components/CloudImage'
 import { useProductSelection } from '../../hooks/useProductSelection'
 import SkuSelector from '../../components/SkuSelector'
 import ModifierGroup from '../../components/ModifierGroup'
@@ -116,7 +116,7 @@ function ProductDetailContent({ product }: { product: Product }) {
     <View className='product-detail-page'>
       {/* 商品图片 */}
       {product.image && (
-        <Image className='product-hero-image' src={getImageUrl(product.image)} mode='aspectFill' />
+        <CloudImage className='product-hero-image' src={product.image} mode='aspectFill' />
       )}
 
       {/* 商品基本信息 */}

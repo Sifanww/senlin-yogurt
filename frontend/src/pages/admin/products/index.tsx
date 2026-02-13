@@ -1,7 +1,8 @@
-import { View, Text, Image, Input, Textarea, Picker, ScrollView } from '@tarojs/components'
+import { View, Text, Input, Textarea, Picker, ScrollView } from '@tarojs/components'
 import { useState } from 'react'
 import Taro, { useDidShow } from '@tarojs/taro'
-import { productApi, categoryApi, getImageUrl } from '../../../services'
+import { productApi, categoryApi } from '../../../services'
+import CloudImage from '../../../components/CloudImage'
 import './index.scss'
 
 // ---------- 类型定义 ----------
@@ -284,7 +285,7 @@ export default function AdminProducts() {
         <View className='product-list'>
           {products.map(item => (
             <View key={item.id} className='product-item'>
-              <Image className='product-image' src={getImageUrl(item.image || '')} mode='aspectFill' />
+              <CloudImage className='product-image' src={item.image || ''} mode='aspectFill' />
               <View className='product-info'>
                 <View className='name'>
                   {item.name}
@@ -347,7 +348,7 @@ export default function AdminProducts() {
               <View className='form-item'>
                 <Text className='label'>商品图片</Text>
                 {form.image ? (
-                  <Image className='preview-image' src={getImageUrl(form.image)} mode='aspectFill' onClick={handleChooseImage} />
+                  <CloudImage className='preview-image' src={form.image} mode='aspectFill' onClick={handleChooseImage} />
                 ) : (
                   <View className='image-upload' onClick={handleChooseImage}>
                     <Text className='upload-icon'>+</Text>

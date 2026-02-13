@@ -1,8 +1,8 @@
-import { View, Text, Image, ScrollView } from '@tarojs/components'
+import { View, Text, ScrollView } from '@tarojs/components'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Taro, { useDidShow, useReady } from '@tarojs/taro'
 import { categoryApi, productApi } from '../../services'
-import { getImageUrl } from '../../services'
+import CloudImage from '../../components/CloudImage'
 import './index.scss'
 
 interface Category {
@@ -308,7 +308,7 @@ export default function Order() {
 
               {catProducts.map((product) => (
                 <View key={product.id} className='product-item'>
-                  <Image className='product-image' src={getImageUrl(product.image)} mode='aspectFill' />
+                  <CloudImage className='product-image' src={product.image} mode='aspectFill' />
                   <View className='product-info'>
                     <Text className='product-name'>{product.name}</Text>
                     <Text className='product-desc'>{product.description}</Text>
@@ -373,7 +373,7 @@ export default function Order() {
             <ScrollView className='cart-list' scrollY>
               {cart.map(item => (
                 <View key={item.cartId} className='cart-item'>
-                  <Image className='cart-item-image' src={getImageUrl(item.product.image)} mode='aspectFill' />
+                  <CloudImage className='cart-item-image' src={item.product.image} mode='aspectFill' />
                   <View className='cart-item-info'>
                     <Text className='cart-item-name'>{item.product.name}</Text>
                     {item.product.description && item.product.description !== '默认配置' && (

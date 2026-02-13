@@ -1,8 +1,8 @@
-import { View, Text, Image, ScrollView, Textarea } from '@tarojs/components'
+import { View, Text, ScrollView, Textarea } from '@tarojs/components'
 import { useState, useEffect } from 'react'
 import Taro, { useRouter, useDidShow } from '@tarojs/taro'
 import { orderApi, addressApi } from '../../services'
-import { getImageUrl } from '../../services'
+import CloudImage from '../../components/CloudImage'
 import './index.scss'
 
 interface CartItem {
@@ -268,7 +268,7 @@ export default function Checkout() {
           <View className='goods-card'>
             {cartItems.map(item => (
               <View key={item.cartId} className='goods-item'>
-                <Image className='goods-image' src={getImageUrl(item.product.image)} mode='aspectFill' />
+                <CloudImage className='goods-image' src={item.product.image} mode='aspectFill' />
                 <View className='goods-info'>
                   <Text className='goods-name'>{item.product.name}</Text>
                   <Text className='goods-spec'>{getProductDesc(item)}</Text>
