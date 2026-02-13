@@ -15,26 +15,19 @@ export default function ModifierGroup({ group, selectedIds, valid = true, onTogg
   const { rules } = group
   const isSingle = rules.max === 1
 
-  // 副标题：如 "必选1项" 或 "请任选3款"
   const subtitle = isSingle
     ? `必选1项`
     : rules.min === rules.max
       ? `请任选${rules.min}款`
       : `选${rules.min}~${rules.max}款`
 
-  const progress = `${selectedIds.length}/${rules.min}`
-
   return (
     <View className='modifier-group'>
       <View className='modifier-group__header'>
         <View className='modifier-group__title-row'>
           <Text className='modifier-group__title'>{group.title}</Text>
-          {!valid && <Text className='modifier-group__required'>未完成</Text>}
         </View>
-        <View className='modifier-group__meta'>
-          <Text className='modifier-group__subtitle'>{group.desc || subtitle}</Text>
-          <Text className='modifier-group__progress'>{progress}</Text>
-        </View>
+        <Text className='modifier-group__subtitle'>{group.desc || subtitle}</Text>
       </View>
 
       <View className='modifier-group__options'>
@@ -43,10 +36,9 @@ export default function ModifierGroup({ group, selectedIds, valid = true, onTogg
           const isDisabled = !!option.sold_out
 
           const tagCls = [
-            'modifier-option',
-            isActive ? 'modifier-option--active' : '',
-            isDisabled ? 'modifier-option--disabled' : '',
-            isSingle ? 'modifier-option--radio' : 'modifier-option--check',
+            'modifier-tag',
+            isActive ? 'modifier-tag--active' : '',
+            isDisabled ? 'modifier-tag--disabled' : '',
           ].filter(Boolean).join(' ')
 
           return (
@@ -55,15 +47,11 @@ export default function ModifierGroup({ group, selectedIds, valid = true, onTogg
               className={tagCls}
               onClick={() => !isDisabled && onToggle(group.id, option.id)}
             >
-              {/* 选中指示器 */}
-              <View className='modifier-option__indicator'>
-                {isActive && <View className='modifier-option__dot' />}
-              </View>
-              <Text className='modifier-option__name'>{option.name}</Text>
+              <Text className='modifier-tag__name'>{option.name}</Text>
               {option.price > 0 && (
-                <Text className='modifier-option__price'>+¥{option.price}</Text>
+                <Text className='modifier-tag__price'>+¥{option.price}</Text>
               )}
-              {isDisabled && <Text className='modifier-option__badge'>售罄</Text>}
+              {isDisabled && <Text className='modifier-tag__badge'>售罄</Text>}
             </View>
           )
         })}

@@ -169,6 +169,9 @@ function ProductDetailContent({ product }: { product: Product }) {
         </View>
       </View>
 
+      {/* 底部占位，防止被固定操作栏遮挡 */}
+      <View className='bottom-placeholder' />
+
       {/* 底部操作栏 */}
       <ActionFooter
         price={priceBreakdown}

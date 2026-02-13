@@ -132,3 +132,9 @@
   min-width: 80px;
   text-align: center;
 }
+
+
+// 底部占位，与固定操作栏等高
+.bottom-placeholder {
+  height: calc(140px + env(safe-area-inset-bottom));
+}
