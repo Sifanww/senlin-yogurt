@@ -12,6 +12,29 @@ interface CloudImageProps {
 // 全局缓存：避免同一个 fileID 重复请求
 const urlCache = new Map<string, string>()
 
+// 启动时从 Storage 恢复缓存
+try {
+  const stored = Taro.getStorageSync('cloudImageCache')
+  if (stored) {
+    const parsed = JSON.parse(stored) as Record<string, string>
+    Object.entries(parsed).forEach(([k, v]) => urlCache.set(k, v))
+  }
+} catch {}
+
+// 持久化缓存到 Storage（节流，避免频繁写入）
+let persistTimer: any = null
+function persistCache() {
+  if (persistTimer) return
+  persistTimer = setTimeout(() => {
+    persistTimer = null
+    try {
+      const obj: Record<string, string> = {}
+      urlCache.forEach((v, k) => { obj[k] = v })
+      Taro.setStorageSync('cloudImageCache', JSON.stringify(obj))
+    } catch {}
+  }, 500)
+}
+
 // 批量请求队列：合并短时间内的多个请求
 let pendingQueue: { fileID: string; resolve: (url: string) => void }[] = []
 let flushTimer: any = null
@@ -25,11 +48,11 @@ function flushQueue() {
 
   const fileList = [...new Set(batch.map(b => b.fileID))]
 
-  Taro.cloud.callFunction({
-    name: 'getTempFileURL',
-    data: { fileList }
+  // 直接调用客户端 API，省掉云函数中转的冷启动和网络开销
+  Taro.cloud.getTempFileURL({
+    fileList
   }).then((res: any) => {
-    const resultList = res.result?.fileList || []
+    const resultList = res.fileList || []
     const urlMap = new Map<string, string>()
     resultList.forEach((item: any) => {
       if (item.tempFileURL) {
@@ -37,6 +60,7 @@ function flushQueue() {
         urlCache.set(item.fileID, item.tempFileURL)
       }
     })
+    persistCache()
     batch.forEach(b => b.resolve(urlMap.get(b.fileID) || b.fileID))
   }).catch(() => {
     batch.forEach(b => b.resolve(b.fileID))

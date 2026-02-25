@@ -33,6 +33,7 @@ function formatDateTime(value: any): string {
 
 export default function OrderDetail() {
   const router = useRouter()
+  const [statusBarHeight, setStatusBarHeight] = useState(0)
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -47,6 +48,11 @@ export default function OrderDetail() {
       path: `/pages/orderDetail/index?orderId=${order.id}`
     }
   })
+
+  useEffect(() => {
+    const sysInfo = Taro.getSystemInfoSync()
+    setStatusBarHeight(sysInfo.statusBarHeight || 0)
+  }, [])
 
   useEffect(() => {
     loadOrder()
@@ -132,7 +138,7 @@ export default function OrderDetail() {
   if (loading) {
     return (
       <View className='order-detail-page'>
-        <View className='nav-bar'>
+        <View className='nav-bar' style={{ paddingTop: `${statusBarHeight}px` }}>
           <View className='nav-back' onClick={goBack}>
             <Text className='back-icon'>‹</Text>
           </View>
@@ -147,7 +153,7 @@ export default function OrderDetail() {
   if (!order) {
     return (
       <View className='order-detail-page'>
-        <View className='nav-bar'>
+        <View className='nav-bar' style={{ paddingTop: `${statusBarHeight}px` }}>
           <View className='nav-back' onClick={goBack}>
             <Text className='back-icon'>‹</Text>
           </View>
@@ -161,7 +167,7 @@ export default function OrderDetail() {
 
   return (
     <View className='order-detail-page'>
-      <View className='nav-bar'>
+      <View className='nav-bar' style={{ paddingTop: `${statusBarHeight}px` }}>
         <View className='nav-back' onClick={goBack}>
           <Text className='back-icon'>‹</Text>
         </View>

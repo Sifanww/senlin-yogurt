@@ -29,6 +29,7 @@ interface Address {
 
 export default function Checkout() {
   const router = useRouter()
+  const [statusBarHeight, setStatusBarHeight] = useState(0)
   const [orderType, setOrderType] = useState<'pickup' | 'delivery'>('pickup')
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [remark, setRemark] = useState('')
@@ -36,6 +37,11 @@ export default function Checkout() {
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null)
   const [showAddressPicker, setShowAddressPicker] = useState(false)
   const [userId, setUserId] = useState<number | null>(null)
+
+  useEffect(() => {
+    const sysInfo = Taro.getSystemInfoSync()
+    setStatusBarHeight(sysInfo.statusBarHeight || 0)
+  }, [])
 
   useEffect(() => {
     // 检查登录状态
@@ -198,7 +204,7 @@ export default function Checkout() {
   return (
     <View className='checkout-page'>
       {/* 顶部导航 */}
-      <View className='nav-bar'>
+      <View className='nav-bar' style={{ paddingTop: `${statusBarHeight}px` }}>
         <View className='nav-back' onClick={goBack}>
           <Text className='back-icon'>‹</Text>
         </View>

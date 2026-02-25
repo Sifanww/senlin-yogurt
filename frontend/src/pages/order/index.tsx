@@ -253,13 +253,13 @@ export default function Order() {
         <View className='order-type-switch'>
           <View
             className={`type-btn ${orderType === 'pickup' ? 'active' : ''}`}
-            onClick={() => setOrderType('pickup')}
+            onClick={() => { setOrderType('pickup'); Taro.setStorageSync('orderType', 'pickup') }}
           >
             自提
           </View>
           <View
             className={`type-btn ${orderType === 'delivery' ? 'active' : ''}`}
-            onClick={() => setOrderType('delivery')}
+            onClick={() => { setOrderType('delivery'); Taro.setStorageSync('orderType', 'delivery') }}
           >
             外卖
           </View>
