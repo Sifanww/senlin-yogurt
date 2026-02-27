@@ -8,6 +8,9 @@ const CLOUD_ENV = 'cloud1-7gzyxt14bc720a11'
 // 初始化云开发
 let cloudInitialized = false
 
+let _resolveCloudReady: () => void
+export const cloudReady = new Promise<void>(resolve => { _resolveCloudReady = resolve })
+
 export function initCloud() {
   if (cloudInitialized) return
 
@@ -17,6 +20,7 @@ export function initCloud() {
       traceUser: true
     })
     cloudInitialized = true
+    _resolveCloudReady()
     console.log('☁️ 云开发初始化成功')
   } else {
     console.error('❌ 当前环境不支持云开发')

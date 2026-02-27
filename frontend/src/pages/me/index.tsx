@@ -1,7 +1,6 @@
-import { View, Text, Image, Button } from '@tarojs/components'
+import { View, Text, Button } from '@tarojs/components'
 import { useState, useEffect } from 'react'
 import Taro, { useDidShow } from '@tarojs/taro'
-import { settingsApi } from '../../services'
 import './index.scss'
 
 interface UserInfo {
@@ -16,7 +15,6 @@ interface UserInfo {
 export default function Me() {
   const [user, setUser] = useState<UserInfo | null>(null)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [bgImage, setBgImage] = useState('https://img.yzcdn.cn/vant/cat.jpeg')
 
   const checkLoginStatus = () => {
     const token = Taro.getStorageSync('token')
@@ -31,20 +29,8 @@ export default function Me() {
     }
   }
 
-  const fetchBgImage = async () => {
-    try {
-      const res = await settingsApi.getMeBgImage()
-      const data = res.data || res
-      const url = data?.url || data?.data?.url
-      if (url) setBgImage(url)
-    } catch (e) {
-      console.error('获取背景图失败', e)
-    }
-  }
-
   useEffect(() => {
     checkLoginStatus()
-    fetchBgImage()
   }, [])
 
   // 每次页面显示时检查登录状态
@@ -96,13 +82,7 @@ export default function Me() {
   return (
     <View className='me'>
       {/* 顶部背景 */}
-      <View className='header-bg'>
-        <Image
-          className='bg-image'
-          src={bgImage}
-          mode='aspectFill'
-        />
-      </View>
+      <View className='header-bg' />
 
       {/* 会员卡片 */}
       <View className='member-card'>

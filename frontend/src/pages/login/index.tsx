@@ -2,6 +2,7 @@ import { View, Text, Input, Button } from '@tarojs/components'
 import { useState } from 'react'
 import Taro from '@tarojs/taro'
 import { userApi } from '../../services'
+import { safeNavigateBack } from '../../utils/navigate'
 import './index.scss'
 
 // 是否使用云开发模式（微信一键登录）
@@ -22,7 +23,7 @@ export default function Login() {
       Taro.showToast({ title: '登录成功', icon: 'success' })
       
       setTimeout(() => {
-        Taro.navigateBack()
+        safeNavigateBack()
       }, 1500)
     } catch (error: any) {
       Taro.showToast({ title: error.message || '登录失败', icon: 'none' })
@@ -65,7 +66,7 @@ export default function Login() {
         if (res.user?.role === 'admin') {
           Taro.reLaunch({ url: '/pages/admin/index/index' })
         } else {
-          Taro.navigateBack()
+          safeNavigateBack()
         }
       }, 1500)
     } catch (error: any) {

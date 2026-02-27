@@ -130,10 +130,26 @@ export const orderApi = {
       orderBy: { field: 'id', order: 'desc' }
     })
 
-    // 为每个订单查询商品明细
+    // 批量查询所有订单的商品明细（避免 N+1）
+    const orderIds = data.map((o: any) => o.id)
+    const allItems: any[] = []
+    // db.command.in 一次最多 20 个值，分批查询
+    for (let i = 0; i < orderIds.length; i += 20) {
+      const batch = orderIds.slice(i, i + 20)
+      const itemsRes = await db.collection('order_items').where({
+        order_id: db.command.in(batch)
+      }).get()
+      allItems.push(...(itemsRes.data || []))
+    }
+    // 按 order_id 分组挂载
+    const itemsMap = new Map<number, any[]>()
+    for (const item of allItems) {
+      const list = itemsMap.get(item.order_id) || []
+      list.push(item)
+      itemsMap.set(item.order_id, list)
+    }
     for (const order of data) {
-      const itemsRes = await db.collection('order_items').where({ order_id: order.id }).get()
-      order.items = itemsRes.data || []
+      order.items = itemsMap.get(order.id) || []
     }
 
     return { data }

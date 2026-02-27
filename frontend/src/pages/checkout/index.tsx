@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import Taro, { useRouter, useDidShow } from '@tarojs/taro'
 import { orderApi, addressApi } from '../../services'
 import CloudImage from '../../components/CloudImage'
+import { safeNavigateBack } from '../../utils/navigate'
 import './index.scss'
 
 interface CartItem {
@@ -56,7 +57,7 @@ export default function Checkout() {
           if (res.confirm) {
             Taro.navigateTo({ url: '/pages/login/index' })
           } else {
-            Taro.navigateBack()
+            safeNavigateBack()
           }
         }
       })
@@ -180,7 +181,7 @@ export default function Checkout() {
     }
   }
 
-  const goBack = () => Taro.navigateBack()
+  const goBack = () => safeNavigateBack()
 
   const handleAddressClick = () => {
     if (addresses.length === 0) {

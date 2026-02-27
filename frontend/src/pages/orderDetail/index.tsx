@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import Taro, { useRouter, useShareAppMessage } from '@tarojs/taro'
 import { orderApi } from '../../services'
 import { Order, OrderStatus, OrderStatusText } from '../../types/order'
+import { safeNavigateBack } from '../../utils/navigate'
 import './index.scss'
 
 function formatDateTime(value: any): string {
@@ -72,7 +73,7 @@ export default function OrderDetail() {
       if (msg.includes('无权') || msg.includes('登录')) {
         Taro.showToast({ title: msg, icon: 'none' })
         setTimeout(() => {
-          Taro.navigateBack()
+          safeNavigateBack()
         }, 1500)
       }
     } finally {

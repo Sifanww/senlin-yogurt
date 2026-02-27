@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { orderApi } from '../../services'
 import { OrderStatus, OrderStatusText } from '../../types/order'
+import { safeNavigateBack } from '../../utils/navigate'
 import './index.scss'
 
 interface OrderItem {
@@ -89,7 +90,7 @@ export default function Orders() {
           if (res.confirm) {
             Taro.navigateTo({ url: '/pages/login/index' })
           } else {
-            Taro.navigateBack()
+            safeNavigateBack()
           }
         }
       })
@@ -168,10 +169,10 @@ export default function Orders() {
             </View>
           </View>
         ) : (
-          orders.map(order => {
+          orders.map((order, idx) => {
             const totalQty = order.items?.reduce((sum, item) => sum + item.quantity, 0) || 0
             return (
-              <View key={order.id} className='order-card' onClick={() => viewOrderDetail(order.id)}>
+              <View key={order.order_no || `${order.id}-${idx}`} className='order-card' onClick={() => viewOrderDetail(order.id)}>
                 {/* 第一行：店铺名 + 状态 */}
                 <View className='card-row card-header'>
                   <Text className='store-name'>森邻酸奶</Text>
