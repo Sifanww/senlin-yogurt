@@ -172,7 +172,7 @@ export default function Orders() {
           orders.map((order, idx) => {
             const totalQty = order.items?.reduce((sum, item) => sum + item.quantity, 0) || 0
             return (
-              <View key={order.order_no || `${order.id}-${idx}`} className='order-card' onClick={() => viewOrderDetail(order.id)}>
+              <View key={order.id ?? `${order.order_no}-${idx}`} className='order-card' onClick={() => viewOrderDetail(order.id)}>
                 {/* 第一行：店铺名 + 状态 */}
                 <View className='card-row card-header'>
                   <Text className='store-name'>森邻酸奶</Text>

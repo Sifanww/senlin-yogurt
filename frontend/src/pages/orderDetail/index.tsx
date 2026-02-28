@@ -267,7 +267,7 @@ export default function OrderDetail() {
         {order.status === OrderStatus.PENDING_PAYMENT ? (
           <>
             <View className='btn-cancel' onClick={handleCancelOrder}>取消订单</View>
-            <Button className='btn-primary btn-share' openType='share'>提醒商家</Button>
+            <Button className='btn-primary btn-share' openType='share'>立即付款</Button>
           </>
         ) : (
           <>

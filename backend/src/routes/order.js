@@ -11,10 +11,12 @@ function generateOrderNo() {
     now.getDate().toString().padStart(2, '0') +
     now.getHours().toString().padStart(2, '0') +
     now.getMinutes().toString().padStart(2, '0') +
-    now.getSeconds().toString().padStart(2, '0');
-  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    now.getSeconds().toString().padStart(2, '0') +
+    now.getMilliseconds().toString().padStart(3, '0');
+  const random = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
   return timestamp + random;
 }
+
 
 // 生成取餐码：当天日期 + 顺序号 001-999
 function generatePickupNumber() {

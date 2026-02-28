@@ -125,9 +125,16 @@ export const orderApi = {
     const where: Record<string, any> = { _openid: openid }
     if (params?.status !== undefined) where.status = params.status
 
-    const data = await queryCollection('orders', {
+    const rawData = await queryCollection('orders', {
       where,
       orderBy: { field: 'id', order: 'desc' }
+    })
+    // 按 id 去重
+    const seen = new Set()
+    const data = rawData.filter((o: any) => {
+      if (seen.has(o.id)) return false
+      seen.add(o.id)
+      return true
     })
 
     // 批量查询所有订单的商品明细（避免 N+1）
@@ -161,9 +168,16 @@ export const orderApi = {
     const where: Record<string, any> = {}
     if (params?.status !== undefined) where.status = params.status
 
-    const orders = await queryCollection('orders', {
+    const rawOrders = await queryCollection('orders', {
       where: Object.keys(where).length > 0 ? where : undefined,
       orderBy: { field: 'id', order: 'desc' }
+    })
+    // 按 id 去重，防止云数据库中存在重复记录导致前端 key 冲突
+    const seen = new Set()
+    const orders = rawOrders.filter((o: any) => {
+      if (seen.has(o.id)) return false
+      seen.add(o.id)
+      return true
     })
     
     // 获取所有相关用户的 openid
